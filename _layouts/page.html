@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{site.title}} - {{page.title}}</title>
+        <meta charset="UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="css/main.css"/>
+        {% include gae.html %}
+    </head>
+    <body>
+    <div id="left">
+        <div id="banner">
+            <a href="/"><img src="images/awilkinsidau.png"
+                             alt="awilkins.id.au"/></a>
+        </div>
+        <div id="photo">
+            <img src="images/me.jpg"/>
+        </div>
+        <div id="links">
+            <a href="http://blog.awilkins.id.au"
+                ><img src="images/blogger-favicon.ico"
+                      alt="Blogger" title="Blog" width="16" height="16"/></a>
+            <a href="http://plus.google.com/102738380796586573408"
+                ><img src="images/gplus-favicon.ico" title="Google+"
+                      width="16" height="16"/></a>
+            <a href="http://au.linkedin.com/in/axwalk"
+                ><img src="images/linkedin-favicon.ico"
+                      alt="LinkedIn Profile" title="LinkedIn"/></a>
+            <a href="http://github.com/axw"
+                ><img src="images/github-favicon.ico"
+                      alt="GitHub" title="GitHub"/></a>
+        </div>
+    </div>
+    <div id="main">{{content}}</div>
+    </body>
+</html>
+
