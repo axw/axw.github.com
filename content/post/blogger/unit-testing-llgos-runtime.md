@@ -1,0 +1,16 @@
++++
+title = "Unit-testing llgo's runtime"
+date = 2012-06-03T15:53:00Z
+updated = 2012-06-03T15:53:24Z
+blogimport = true 
+aliases = [
+
+  "/2012/06/unit-testing-llgos-runtime.html",
+
+]
+[author]
+	name = "Andrew Wilkins"
+	uri = "https://plus.google.com/102738380796586573408"
++++
+
+It's been a while since I last wrote, primarily because I've been moving house and was without Internet at home during the process. It's back now, but now I have Diablo III to contend with.<br /><br />In my <a href="http://blog.awilkins.id.au/2012/04/llgo-runtime-emerges.html">previous post</a> I mentioned that I would create a new branch for working on the <a href="http://github.com/axw/llgo">llgo </a>runtime. I haven't done that yet, though I haven't broken the build either. Rather, I've introduced conditional compilation to <a href="http://github.com/axw/gollvm">gollvm </a>for builds against LLVM's trunk where unreleased functionality is required, e.g. LinkModules. This isn't currently being used in llgo-proper, so I've gotten away without branching so far.<br /><br />The tag for building gollvm with unreleased functions is "llvmsvn", so to build gollvm with LLVM's trunk, including the LinkModules function, do the following:<br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;">curl https://raw.github.com/axw/gollvm/master/install.sh -tags llvmsvn | sh</code></pre>So I didn't break "the build", meaning you can still build gollvm/llgo without also building LLVM from source. I did, however, break the llgo unit tests, as they are using the new LinkModules function. If you want to run the unit tests without building LLVM from source, then you can comment out the call to <i>llvm.LinkModules</i>&nbsp;in llgo/utils_test.go<i>; </i>of course, you should&nbsp;expect failures due to the runtime not being linked in, but that doesn't involve all tests.<br /><br />What else is new?<br /><ul><li><a href="https://groups.google.com/d/msg/golang-dev/aYZM61-ySUs/qVjKlt1WtWAJ">I announced on golang-dev a couple of weeks ago</a> that I intend to work on getting exp/types up to snuff. I've moved some of the type construction code out of llgo-proper into llgo/types (a fork of exp/types), and eliminated most of the llgo-specific stuff from llgo/types. I'll need to set aside some time soon to learn how to use Mercurial and create some changelists.</li></ul><ul><li>A few weeks ago I started <a href="https://plus.google.com/u/0/102738380796586573408/posts/GibftVAePRW">playing with llgo and PNaCl</a>, to see how hard it would be to get something running in Chrome. It works (with the IR Translator/external sandbox anyway), but then llgo doesn't really do much at the moment.</li></ul><div>That's all for now.</div>

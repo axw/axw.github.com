@@ -1,0 +1,3 @@
+[submodule "themes/hemingway-axw"]
+	path = themes/hemingway-axw
+	url = https://github.com/axw/hemingway.git

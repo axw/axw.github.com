@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imports in llgo, jr. | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">February 19, 2012</h2>
+    <h1 class="title">Imports in llgo, jr.</h1>
+    <div class="content">
+      <p>So I realised I&rsquo;m a doofus the other day, when I started getting closer to completion on producing export metadata in llgo. Rolling my own import mechanism is unnecessary for now. Instead, I can just lean on the import mechanism that exists in the standard library (well, <a href="http://weekly.golang.org/doc/go1.html#exp">until Go 1</a> at least): go/types/GcImporter.<br /><br />I&rsquo;ve modified llgo to use go/ast/NewPackage, rather than the old code I had that was using go/parser/ParseFiles. The NewPackage function takes an optional &ldquo;importer&rdquo; object which will be used for inter-package dependency resolution, whereas ParseFiles does no resolution. The standard GcImporter type may be used to identify exports by interrogating the object and archive files in $GOROOT. The AST that&rsquo;s generated is filled in with external declarations, so it&rsquo;s then up to llgo to convert those into LLVM external declarations. Easy peasy.<br /><br />Now it&rsquo;s time to come up with a symbol naming scheme. Without having thought about it too hard, I&rsquo;m going to start off with the assumption that the absolute name of the symbol (package+name), with slashes converted to dots, will do the trick. Once I&rsquo;ve implemented that, I&rsquo;ll need to start work on the runtime in earnest. It&rsquo;s also high time I put some automated tests in place, since things are starting to get a little stabler.<br /><br />In the long term I&rsquo;ll probably want to continue on with my original plan, which is to generate module-level metadata in the LLVM bitcode, and then extract this in a custom importer. It should be quite straightforward.&nbsp;Earlier this week I wrapped up some updates to gollvm to add an API to make generating <a href="http://llvm.org/docs/SourceLevelDebugging.html">source-level debugging metadata</a> simpler. This will be useful not only for describing exports, but also for what it&rsquo;s intended: generating <a href="http://dwarfstd.org/">DWARF</a>&nbsp;debug information.<br /><br />In other news: my wife just ordered the 1-4a box set of&nbsp;<a href="http://www-cs-staff.stanford.edu/~uno/taocp.html">The Art of Computer Programming</a>&nbsp;for me. At the moment I am slowly making way through&nbsp;<a href="http://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach">Gödel, Escher, Bach: an Eternal Golden Braid</a>, and so far, so good. Looking forward to more light reading for the bus/train!</p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

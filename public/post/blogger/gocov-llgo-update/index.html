@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gocov, llgo update | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">July 21, 2012</h2>
+    <h1 class="title">gocov, llgo update</h1>
+    <div class="content">
+      <p>I guess it&rsquo;s time for a quick update. I&rsquo;m not very diligent with this blogging thing; too busy having fun, programming. Sorry about that!<br /><br /><h3> Introducing gocov</h3>A couple of weeks ago I <a href="https://groups.google.com/d/topic/golang-nuts/abujHqfUbvo/discussion">announced </a><a href="http://github.com/axw/gocov">gocov</a>, a coverage testing tool for the Go programming language. I wrote gocov to quickly get an idea of how broadly tested packages are (namely exp/types, which I&rsquo;m working on in the background). The tool itself is written in Go, and works by source instrumentation/transformation. Currently gocov only does statement coverage.<br /><br />Using gocov is relatively simple (if I do say so myself). First, you install gocov by running:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;">go get github.com/axw/gocov/gocov</code></pre><br />This will install the gocov tool into your $GOPATH/bin directory. Once you have it installed, you can test a package (i.e. run its tests, and generate coverage data), by running:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;">gocov test &lt;path/to/package&gt;</code></pre><br />Under the covers, this will run &ldquo;go test &lt;path/to/package&gt;&rdquo;, after having gone through the process of instrumenting the source. Once the tests are complete, gocov will output the coverage information as a JSON structure to stdout. So you might want to pipe that output somewhere&hellip;<br /><br />Once you&rsquo;ve got the coverage information, you&rsquo;ll probably want to view it. So there are two other gocov commands: report, and annotate. The <i>report</i> command will generate a text report of the coverage of all the functions in the coverage information provided to it. For example:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;">gocov test github.com/axw/llgo/types | gocov report</code></pre><br />&hellip; will generate a report that looks something like:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><span style="color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace;"><span style="font-size: 12px; line-height: 18px;">&hellip;<br />types/exportdata.go      readGopackHeader              69.23% (<sup>9</sup>&frasl;<sub>13</sub>)<br />types/gcimporter.go      gcParser.expect               66.67% (<sup>4</sup>&frasl;<sub>6</sub>)<br />types/gcimporter.go      gcParser.expectKeyword        66.67% (<sup>2</sup>&frasl;<sub>3</sub>)<br />&hellip;</span></span></pre>The <i>annotate</i>&nbsp;command will print out the source for a specified function, along with an annotation for each line that was missed. For example:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: 'Bitstream Vera Sans Mono', Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;">gocov test github.com/axw/llgo/types | gocov annotate - types.gcParser.expectKeyword</code></pre><br />&hellip; will output the following:<br /><br /><pre style="background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;"><span style="color: #333333; font-family: 'Bitstream Vera Sans Mono', Courier, monospace;"><span style="font-size: 12px; line-height: 18px;">266             func (p <em>gcParser) expectKeyword(keyword string) {<br />267                     lit := p.expect(scanner.Ident)<br />268                     if lit != keyword {<br />269 MISS                        p.errorf(&ldquo;expected keyword %s, got %q&rdquo;, keyword, lit)<br />270                     }<br />271             }</span></span></pre><br />As is often the case when I write software, I wrote gocov for my own needs; as such it&rsquo;s not terribly featureful, only doing what I&rsquo;ve needed thus far. If you would like to add a feature (maybe HTML output, or branch coverage), feel free to send a pull request on the <a href="http://github.com/axw/gocov">Github repository</a>, and I&rsquo;ll take a gander.<br /><br />Anyway, I hope it&rsquo;s of use to people. But not too many people, I don&rsquo;t have time to fix all of my crappy code! (Just kidding, I have no life.)<br /><br /><h3> Update on llgo: interface comparisons, exp/types</h3>I don&rsquo;t have a lot to report on this front, as I&rsquo;ve been doing various other things, like that stuff up there, but I can share a couple of bits of mildly interesting news.<br /><br />I&rsquo;ve been working a little on the runtime for llgo, and I&rsquo;m proud to say there&rsquo;s now an initial implementation of interface comparison in the runtime. This involved filling in the algorithm table for runtime types, implementing the runtime equality function (runtime.memequal), and implementing a runtime function (runtime.compareI2I) to extract and call it. It probably doesn&rsquo;t sound exciting when put like that, but this is something of a milestone.<br /><br />By the way, if you want to actually use the runtime, you can do it like this:<br /><br /><ol><li>Compile your program with llgo, storing the bitcode in file <i>x.ll</i>.</li><li>Compile llgo/runtime/</em>.go with llgo, storing the bitcode in file <i>y.ll</i>.</li><li>Link the two together, using llvm-link: <i>llvm-link -o z.ll x.ll y.ll</i></li></ol><div>And you&rsquo;re done. The resultant module, housed in&nbsp;<i>z.ll</i>, contains your program and the llgo runtime. Now you can concatenate strings and compare interfaces to your heart&rsquo;s content. Eventually llgo will contain an integrated linker, which will rewrite symbol names according to package paths.</div><div><i><br /></i></div><br />Finally, on exp/types: I submitted my first two CL&rsquo;s. Some of my ideas for exp/types were ill thought out, so the first was rejected (fairly), and the second needs some rework. I&rsquo;ll be writing up a design proposal document at some stage, to better document my rationale for changes. Anyway, I&rsquo;ll keep plugging away&hellip;<br /><br />Ade!<br /><br /></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

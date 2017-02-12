@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pushy Python Java | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <article>
+      <h1 class="title"><a href="https://awilkins.id.au/post/blogger/first-post/">First Post</a></h1>
+      <div class="content">
+        <p>Woohoo!<br /><br />On a more serious note&hellip; if anyone stumbles across this page, I will be using it for discussing my project <a href="http://launchpad.net/pushy">Pushy</a>. Pushy is a Python (now Java too) package for connecting to a remote Python interpreter, and accessing objects therein as if they were local. In other words, it&rsquo;s a sort of RPC package.<br /><br />So why another RPC package? While I was working on test automation, I identified a couple of things I didn&rsquo;t like about existing RPC frameworks:<br /><ol><li>Invariably, a nailed-up (i.e. runs for an extended period of time) server is required to be running for you to connect to. This leads to the problem #2.</li><li>Custom software needs to be maintained on both the client and the server.</li><li>The security mechanisms in existing frameworks have a tendency to suck. For nailed-up servers running as an arbitrary user, the server program must perform its own authentication/authorisation to ensure the user can&rsquo;t access resources it isn&rsquo;t supposed to.</li></ol><div>My thinking was this: rather than implementing RPC services and maintaining them on all of these different servers, why can&rsquo;t I put all of the logic in the client? The <a href="http://docs.python.org/library/index.html">Python Standard Library</a>&nbsp;is rather extensive, why don&rsquo;t we just expose that to the client, and let the client define the &ldquo;service&rdquo;?&nbsp;That&rsquo;s the basis of Pushy.</div><div><br /></div><div>So first I started hacking away to develop a proof of concept, using XML-RPC to transparently access objects in a remote interpreter, automatically creating proxy objects to represent remote objects and performing method/operator calls by sending requests. Then I found <a href="http://rpyc.wikidot.com/">RPyC</a>, which did essentially the same thing, only better.&nbsp;</div><div><br /></div><div>So at this stage I&rsquo;ve moved the &ldquo;service&rdquo; from server to client, but I still need to run some code on the server, and it&rsquo;s still &ldquo;nailed-up&rdquo;. What&rsquo;s more, is that the server is running as a single user, which poses a massive security risk. How can we do better? Enter SSH&hellip;&nbsp;SSH is prevalent on Linux and UNIX operating systems, and one of the cool things you do with it is remotely execute a command and pipe to/from its standard I/O. Maybe we could do something with that?</div><div><br /></div><div>Using SSH solves all three problems, in fact. Pushy works as follows: the client application imports the Pushy package, and invokes a function to &ldquo;connect&rdquo; to a remote host. What this does is creates an SSH connection to the remote host, using the username and password (or public-key encryption) specified by the caller. After the connection is created, Pushy executes Python in the remote system, passing it a command-line program. i.e. Something like &ldquo;python -c &lsquo;run_server()&lsquo;&ldquo;. This command-line program is a short one, which reads a larger program off its standard input stream, and executes it to start the Pushy server program. The program didn&rsquo;t exist on disk before the connection, and won&rsquo;t exist after.</div><div><br /></div><div>So let&rsquo;s revisit the three problems now:</div><div><ol><li><i>(Problem: a nailed-up server is required.)</i> Unless you count <i>sshd</i>, no nailed-up services are required on the server. I think it&rsquo;s fair to discount sshd, as it is so commonplace.</li><li><i>(Problem: custom software must be maintained on both client and server.)</i>&nbsp;As described in the paragraph above, there is no longer any custom server code required to be maintained on the server. So we can implement programs to access arbitrary portions of the Python Standard Library on a remote system, with nary a change on the server. There is an added benefit here: if the client/server protocol changes, there&rsquo;s still nothing to upgrade on the server.</li><li><i>(Problem: server code must perform application-level authentication/authorisation.)</i>&nbsp;Did I mention I&rsquo;m lazy? Doing authentication/authorisation properly is a pain in the neck, and I&rsquo;d like to avoid it if I can. Turns out I can if I&rsquo;m using SSH, as the &ldquo;server&rdquo; program is running as the user specified by the client program. Usual operating system authentication and access controls ensues.</li></ol></div><div><br /></div><div>Over time I decided to drop RPyC in favour of a writing my own protocol. I was using RPyC for things it wasn&rsquo;t intended and it showed in various areas, such as exception handling. One thing remains though: the auto-importing feature of RPyC is lovingly imitated by Pushy.</div><ul></ul></p>
+
+      </div>
+      <h2 class="subtitle is-6">
+      Posted June 30, 2010.
+      Tags:   <a href="/tags/pushy-python-java">pushy python java</a>.
+      </h2>
+    </article>
+    
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-left"></i>
+            </span>
+            Newer
+          </a>
+          
+        </div>
+      </div>
+      <div class="level-right is-marginless">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            Older
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

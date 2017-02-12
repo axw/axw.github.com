@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JupyterHub, LXD, and Juju | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	      
+        <a class="nav-item" href="https://awilkins.id.au/"><img src="/images/awilkinsidau.png"/></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">January 1, 2017</h2>
+    <h1 class="title">JupyterHub, LXD, and Juju</h1>
+    <div class="content">
+      
+
+<p><a href="https://jupyter.org">Jupyter</a> is a tool for interactive computing,
+primarily used in the computational science and data science communities.
+I&rsquo;ve long been interested in computational science: not that I&rsquo;m
+particularly <em>au fait</em>, but rather I have a desire to do something with
+my programming skills that comes closer to making the world a better
+place.</p>
+
+<p>So what can I do? I&rsquo;m trying to make complex software easier to use, so
+scientists can spend less time on that, and more time doing the really
+important things. Recently, I&rsquo;ve been focusing on JupyterHub, a multi-
+user server for Jupyter with automatic spawning of notebook servers.</p>
+
+<h1 id="enter-juju">Enter, Juju</h1>
+
+<p>I work on a tool called <a href="https://jujucharms.com">Juju</a>, whose
+<em>raison d&rsquo;etre</em> is installing and managing complex software and operations.
+With Juju, you write <em>charms</em> automate installation and operation of
+software dynamically. Each charm typically focuses on managing one
+application, and that application&rsquo;s integrations with others. JupyterHub
+comprises multiple subsystems. From the JupyterHub documentation:</p>
+
+<blockquote>
+<p>Three major subsystems run by the jupyterhub command line program:</p>
+
+<ul>
+<li>Single-User Notebook Server: a dedicated, single-user, Jupyter Notebook server is started for each user on the system when the user logs in. The object that starts these servers is called a Spawner.</li>
+<li>Proxy: the public facing part of JupyterHub that uses a dynamic proxy to route HTTP requests to the Hub and Single User Notebook Servers.</li>
+<li>Hub: manages user accounts, authentication, and coordinates Single User Notebook Servers using a Spawner.</li>
+</ul>
+</blockquote>
+
+<p>So to do all of this with Juju, I have written several charms. The principal
+charm is called &ldquo;jupyterhub&rdquo;, which manages the hub and proxy subsystems. For
+now, the two components are managed as a single unit, but we may later want
+to decompose them into separate charms to enable distributing them across
+machines.</p>
+
+<p>As described in the JupyterHub documentation, the hub authenticates users and
+spawns notebook servers. Both the authentication mechanism, and spawner, can
+be customised using plugins, so it is natural that we model them as separate
+components (applications) in Juju, and <em>relate</em> them to the jupyterhub
+application. There is a special kind of charm, called a <em>subordinate</em> charm,
+which is most appropriate here; a subordinate is one that will be scoped to
+another application, and colocated to the same machine. Thus, the jupyterhub
+charm allows you to relate subordinates for both authenticator and spawner.
+To start, I have implemented one of each: an authenticator that uses Ubuntu-
+Single Sign On (<em>Ubuntu SSO</em>); and a <a href="https://linuxcontainers.org/lxd/introduction/">LXD</a>-based
+spawner.</p>
+
+<h2 id="authenticator">Authenticator</h2>
+
+<p>The Ubuntu SSO authenticator charm is relatively trivial, and does not require
+much explanation. There is no configuration required; you will be prompted to
+log in using Ubuntu SSO when you navigate to JupyterHub, and will thereafter be
+identified by your Ubuntu SSO/Launchpad user name.</p>
+
+<h2 id="spawner">Spawner</h2>
+
+<p>The LXD spawner charm itself is a little bit more complicated, in order to
+achieve a satisfactory responsiveness. When building the spawner, I had
+several requirements in mind:</p>
+
+<ul>
+<li>Spawning must be fast;</li>
+<li>Notebook servers&rsquo; filesystems must be isolated from each other,
+and restricted from escaping to the host.</li>
+<li>The notebook servers must be kept up-to-date.</li>
+</ul>
+
+<p>LXD supports each of these requirements:</p>
+
+<ul>
+<li>Spawning a container is fast in general, with the speed being primarily
+dependent on the container storage used. With ZFS as the storage backend,
+container creation is sub-second. We create custom images so that the
+required Jupyter applications are available, which necessitates some
+additional work to keep those images up-to-date. This is described below.</li>
+<li>LXD namespaces resources (users, processes, mount points, etc.), and also
+restricts access using AppArmor.</li>
+<li>Where possible, we use <a href="http://snapcraft.io">Snaps</a> to keep the software
+up-to-date. Snaps regularly check for updates, and automatically and
+transactionally update.</li>
+</ul>
+
+<p>The <a href="https://github.com/axw/jupyterhub-lxd-spawner">LXD spawner</a> communicates
+with LXD over HTTPS, so LXD needn&rsquo;t be on the same host as the spawner. The
+charm that manages the spawner &ndash; jupyterhub-lxd-spawner &ndash; can be related to
+another application implementing the LXD relation interface . We have
+implemented a very basic charm that configures LXD on Ubuntu, but it does not
+yet support any configuration, storage optimisation, etc. There is an existing
+&ldquo;lxd&rdquo; charm used for the nova-lxd hypervisor for OpenStack. This is not
+suitable as-is, since it is a subordinate, and so does not support deploying
+LXD separately from the spawner. We intend to push for having the existing
+charm updated to be made a principal (non-subordinate) charm.</p>
+
+<h1 id="image-customisation">Image Customisation</h1>
+
+<ul>
+<li>lxd-image-builder</li>
+<li>relation interface, consumer specifies base image, commands to run on top</li>
+<li>create new image</li>
+<li>observe base image changes, recreate</li>
+</ul>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+

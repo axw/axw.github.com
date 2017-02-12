@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>llgo update: Go1, automated tests | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">April 8, 2012</h2>
+    <h1 class="title">llgo update: Go1, automated tests</h1>
+    <div class="content">
+      <p>This week I finished up&nbsp;<a href="http://www.udacity.com/overview/Course/cs373">Udacity CS373: Programming a Robotic Car</a>, and also <i>finally </i>finished reading <a href="http://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach">GEB</a>. So I&rsquo;ll hopefully be able to commit some more time to llgo again.<br /><div><br /></div><div>I moved on to Go&rsquo;s weekly builds a while back, and updated both llgo and gollvm to conform. I&rsquo;m now on Go 1, as I hope most people are by now, and llgo is in good shape for Go 1 too. That&rsquo;s not to say that it compiles all of the Go 1 language, just that it runs in Go 1. Apart from that, I&rsquo;ve just been working through some sample programs to increase the compiler&rsquo;s capability.</div><div><br /></div><div>One of the things that I&rsquo;ve been a bit lazy about with llgo is automated testing, something I&rsquo;m usually pretty keen on. I&rsquo;ve grown anxious over regressions as time has gone on in the development, so I&rsquo;ve spent a little bit of time this week putting together an automated test suite, which I <a href="https://groups.google.com/d/topic/golang-nuts/s_EehtIclUY/discussion">mentioned in golang-nuts</a> a few days ago. The test suite doesn&rsquo;t cover a great deal yet, but it has picked up a couple of bugs already.</div><div><br /></div><div>One of the numerous things I like about Go is its well integrated tooling. For testing, Go provides the <a href="http://golang.org/pkg/testing">testing</a>&nbsp;package, and <a href="http://golang.org/cmd/go/#Test_packages">go test</a>&nbsp;tool. So you write your unit tests according to the specifications in the &ldquo;testing&rdquo; package, run &ldquo;go test&rdquo;, and your tests are all run. This is comparable to, say, Python, which has a similar &ldquo;unittest&rdquo; package. It is vastly more friendly than the various C++ unit test frameworks; that&rsquo;s in large part due to the way the Go language is designed, particularly with regard to how it fits into build systems and is parsed.</div><div><br /></div><div>In Go, everything you need to build a package is in the source (assuming you use the &ldquo;go&rdquo; command).</div><div><ul><li>The only external influences on the build process (environment variables GOOS, GOARCH, GOROOT, etc.) apply to the entire build procedure, not to single compilation units. Each variant will end up in a separate location when built: ${GOPATH}/pkg/${GOOS}_${GOARCH}/&lt;pkgname&gt;.</li><li>Platform-specific code is separated into multiple files (xxx_linux.go, xxx_windows.go, &hellip;), and they&rsquo;re automatically matched with the OS/architecture by the &ldquo;go&rdquo; command.</li><li>Package dependencies are automatically and unambiguously resolved. Compare this with C/C++ headers, which might come from anywhere in the preprocessor&rsquo;s include path.</li></ul><div>So anyway, back to llgo&rsquo;s testing. It works just like this: I&rsquo;ve created a separate program for each test case in the <span style="font-family: 'Courier New', Courier, monospace;">llgo/llgo/testdata</span>&nbsp;directory. Each of these programs corresponds to a test case written against the &ldquo;testing&rdquo; package, which does the following:</div></div><div><ol><li>Run the program using &ldquo;go run&rdquo;, and store the output.</li><li>Redirect stdout to a pipe, and run a goroutine to capture the output to a string.</li><li>Compile the program using llgo&rsquo;s Compile API, and then interpret the resultant bitcode using gollvm&rsquo;s ExecutionEngine API.</li><li>Restore the original stdout, and compare the output with that of the original &ldquo;go run&rdquo;.</li></ol><div>Pretty obvious I guess, but I was happy with how easy it was to do. Defer made the job of redirecting, restoring and closing file descriptors pain free; the go statement and channels made capturing and communicating the resulting data a cinch.</div></div><div><br /></div><div>This is getting a little ramble-ish, so I&rsquo;ll finish up. While testing, I discovered a problem with the way LLVM types are generated from <i>types.Type</i>&rsquo;s, which basically means that they need to be cached and reused, rather that generated afresh each time. At the same time I intend to remove all references to LLVM from my clone of the &ldquo;types&rdquo; package, and offer my updates back to the Go team. It&rsquo;s not fully functional yet, but there&rsquo;s at least a few gaps that I&rsquo;ve filled in.<br /><br />One last thing: LLVM 3.1 is due out May 14, so gollvm and llgo will no longer require LLVM from SVN. I really want to eliminate the dependency on llvm-config from the build of gollvm. I&rsquo;m considering a dlopen/dlsym shim and removing the cgo dependency on LLVM. I&rsquo;d be keen to hear some opinions, suggestions or alternatives.<br /><br />Until next time.</div></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

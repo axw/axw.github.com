@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le sigh | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">June 21, 2011</h2>
+    <h1 class="title">Le sigh</h1>
+    <div class="content">
+      <p>I&rsquo;ve been coming across more problems with Boost Wave. The current ones blocking me are:<br /><ul><li>A lack of an efficient way to conditionally disable a macro. The &ldquo;context policy&rdquo; provides hooks for handling macro expansions, and its return value is meant to control whether the expansion takes place. It doesn&rsquo;t work. I&rsquo;ll write up a bug report when I get some time.</li><li>Wave isn&rsquo;t very forgiving about integer under/overflow. For example, the GNU C library&rsquo;s header &ldquo;/usr/include/bits/wchar.h&rdquo; has the following tidbit to determine the sign of wide characters, which Boost Wave barfs on:</li></ul><pre class="brush:c">#elif L&rsquo;\0&rsquo; - 1 &gt; 0</pre><br /><div>I think the latter &ldquo;problem&rdquo; might actually be reasonable - I believe the standards say that handling of overflow is undefined, and preprocessor/compiler-specific. That doesn&rsquo;t help me much though. I could fix this by writing code to parse the expressions, which seems silly, or by passing off to the target preprocessor (e.g. GCC), which seems like overkill.<br /><br />I&rsquo;m going to have a look at how hard it would be to use LLVM/Clang&rsquo;s preprocessor instead. If that&rsquo;s a better bet, I may go that way. Otherwise, it might be time to get approval to send patches to the Wave project.</div></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

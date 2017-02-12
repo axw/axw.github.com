@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello, Mr. Hooker. | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">September 5, 2011</h2>
+    <h1 class="title">Hello, Mr. Hooker.</h1>
+    <div class="content">
+      <p>I&rsquo;ve been procrastinating on <a href="http://github.com/axw/cmonster">cmonster</a>.&nbsp;I have some nasty architectural decisions to make, and I keep putting it off. In the mean time I&rsquo;ve been working on a new little tool called &ldquo;Mr. Hooker&rdquo; (or just <a href="http://github.com/axw/mrhooker">mrhooker</a>).<br /><br /><b>Introducing Mr. Hooker</b><br /><br />The idea behind mrhooker is very simple: I wanted to be able to write LD_PRELOAD hooks in Python. If you&rsquo;re not familiar with LD_PRELOAD, it&rsquo;s a mechanism employed by various UNIX and UNIX-like operating systems for &ldquo;preloading&rdquo; some specified code in a shared library. You can use this to provide your own version of native functions, including those in standard libraries such as libc.<br /><br />Anyway, I occasionally find the need for an LD_PRELOAD library to change the behaviour of a program that I can&rsquo;t easily recompile. Often these libraries will be throw-away, so it might end up taking just as long to write the LD_PRELOAD library. So I wrote mrhooker to simplify this.<br /><br />It turns out there&rsquo;s very little to do, since <a href="http://cython.org/">Cython </a>(and friends) do most of the hard work. Cython is a programming language that extends Python to simplify building Python extensions. It also has an interface for building these extensions on-the-fly. So mrhooker doesn&rsquo;t need to do much - it takes a .pyx (Pyrex/Cython source) and compiles it to a shared library using Cython. Mrhooker takes this, and some common code, and loads it into a child process using LD_PRELOAD.<br /><br /><b>Example - Hooking BSD Sockets</b><br /><b><br /></b><br />Let&rsquo;s look at an example of how to use mrhooker. Hooks are defined as external functions in a Cython script.&nbsp;Say we want to hook the BSD sockets &ldquo;send&rdquo; function. First we&rsquo;d find the signature of send (man 2 send), which is:<br /><br /><pre class="prettyprint">ssize_t send(int sockfd, const void *buf, size_t len, int flags);</pre><br />Given this, we can produce a wrapper in Cython, like so:<br /><br /><pre class="prettyprint">cdef extern ssize_t send(int sockfd, char *buf, size_t len, int flags) with gil:<br />    &hellip;<br /></pre><br />There&rsquo;s a couple of important things to note here. First, the parameter type for &ldquo;buf&rdquo; drops const, since Cython doesn&rsquo;t know about const-ness. Second, and crucially, the function must be defined &ldquo;with gil&rdquo;. This ensures that the function acquires the Python Global Interpreter Lock before calling any Python functions. Okay, with that out of the way, let&rsquo;s go on&hellip;<br /><br />We&rsquo;ll want to do something vaguely useful with this wrapper. Let&rsquo;s make it print out the argument values, and then continue on with calling the original &ldquo;send&rdquo; function. To do that we&rsquo;ll use dlsym/RTLD_NEXT to find the next function called &ldquo;send&rdquo;.<br /><br /><pre class="prettyprint">cdef extern ssize_t send(int sockfd, char <em>buf, size_t len, int flags) with gil:<br />    print &ldquo;====&gt; send(%r, %r, %r, %r)&rdquo; % (sockfd, buf[:len], len, flags)<br />    real_send = dlsym(RTLD_NEXT, &ldquo;send&rdquo;)<br />    if real_send:<br />        with nogil:<br />            res = (&lt;ssize_t(</em>)(int, void<em>, size_t, int) nogil&gt;real_send)(<br />                sockfd, buf, len, flags)<br />        return res<br />    else:<br />        return -1<br /></pre><br />We&rsquo;ll also need to declare dlsym and RTLD_NEXT. Let&rsquo;s do that.<br /><br /><pre class="prettyprint"># Import stuff from &lt;dlfcn.h&gt;<br />cdef extern from &ldquo;dlfcn.h&rdquo;:<br />    void</em> dlsym(void<em>, char</em>)<br />    void* RTLD_NEXT<br /></pre><br />Now you just run:<br /><br /><pre class="prettyprint lang-bash">mrhooker &lt;script.pyx&gt; &lt;command&gt;<br /></pre><br /><br />And there we go. This is trivial - it would also be fairly trivial to write a C program to do this. But if we wanted to do anything more complex, or if we were frequently changing the wrapper function, I&rsquo;d much rather write it in Python - or Cython, as it were.<br /><br />Enjoy!<br /><br /><hr /><b>Edit:</b> I just noticed that it&rsquo;s broken if you don&rsquo;t have a certain config file. I always had one while testing&hellip; until I got to work.<br />You&rsquo;ll get an error &ldquo;ConfigParser.NoSectionError: No section: &lsquo;default&rsquo;&ldquo;. I&rsquo;ll fix the code at home, but in the mean time you can do this:<br /><br /><pre class="prettyprint lang-bash">$ mkdir ~/.mrhooker<br />$ echo [default] &gt; ~/.mrhooker/mrhooker.config<br /></pre><br />P.S. if you add &ldquo;build_dir = &lt;path&gt;&rdquo; in that section, or a per-module section, mrhooker/Cython will store the shared library that it builds. Then if you don&rsquo;t change the source it&rsquo;ll be used without rebuilding.</p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

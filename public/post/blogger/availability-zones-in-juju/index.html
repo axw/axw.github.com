@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Availability Zones in Juju | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">August 19, 2014</h2>
+    <h1 class="title">Availability Zones in Juju</h1>
+    <div class="content">
+      <p><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"></div><div style="text-align: left;">You would be forgiven for thinking that I&rsquo;d fallen off the face of the earth, considering how long it has been since I last wrote. I&rsquo;ve been busy with my day job, moving into a new house; life in general. Work on <a href="https://github.com/go-llvm/llgo">llgo</a>&nbsp;has been progressing, mostly due to Peter Collingbourne. I&rsquo;ll have more to say about llgo&rsquo;s progress in future posts.</div><div style="text-align: left;"><br /></div><div style="text-align: left;">This post is about some of the work I&rsquo;ve done on&nbsp;<a href="http://juju.ubuntu.com/">Juju</a>&nbsp;recently. Well, semi-recently; this post has been sitting in my drafts for a little while, waiting for the new 1.20.5 release to be announced.</div><div style="text-align: left;"><br /></div><br /><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-Pw7IeMRzbtM/U_K3cyQ5SRI/AAAAAAAAhIY/-Pl2Dh3TgGI/s1600/andnowforsomethingcompletelydifferent.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-Pw7IeMRzbtM/U_K3cyQ5SRI/AAAAAAAAhIY/-Pl2Dh3TgGI/s1600/andnowforsomethingcompletelydifferent.png" height="320" width="225" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><h2>Availability Zones in Juju</h2>One of the major focuses of the <a href="https://juju.ubuntu.com/docs/reference-release-notes.html">Juju 1.20 release</a> has been around high availability (HA). There are two sides to this: high availability of Juju itself, and high availability of your deployed services. We’ll leave the “Juju itself” side for another day, and talk about HA charms/services.<br /><br />Until now, if you deployed a service via a charm with Juju, your cloud instance containing the service unit would be allocated wherever the cloud provider decided best. Most cloud providers split their compute services up into geographic regions (“us-east-1” in Amazon EC2, “US West” in Microsoft Azure, etc.). Some providers also break those regions down into “availability zones” (though the actual term may vary between providers, we use the term availability zone to describe the concept). An availability zone is essentially an isolated subset of a region.<br /><br />If you’re developing an application that demands high availability, then you probably want to make sure your application is spread across availability zones. Some providers will guarantee a service level agreement (SLA) if you do this, such as on Microsoft Azure. Provided that you allocate at least two VMs to a “Cloud Service” on Azure, then you’re guaranteed a 99.95% uptime under the SLA and you get reimbursed if the guarantee isn’t met.<br /><br />In Juju 1.20, there are two options for distributing your service units across availability zones: explicit (akin to machine placement) and automatic. So far we have enabled explicit availability zone placement in the Amazon EC2 and OpenStack (Havana onwards) providers, with support for the <a href="https://maas.ubuntu.com/">MAAS</a> provider on the horizon. To add a new machine to a specific availability zone, use the “zone=” placement directive as below:<br /><blockquote class="tr_bq">juju add-machine zone=us-east-1b</blockquote><br />As well as support for explicit zone placement, we’ve implemented automatic spreading of services units across availability zones for Amazon EC2, OpenStack and Microsoft Azure. When cloud instances are provisioned, they will be allocated to an availability zone according to the density of the availability zone population for related instances. Two cloud instances are considered related if they both contain units of a common service, or if they are both Juju state servers.<br /><br />To illustrate automatic spread, consider the mongodb charm. You’re going to use MongoDB as the datastore for your application, and you want to make sure the datastore is highly available; to do that, you’ll want to create a <a href="http://docs.mongodb.org/manual/replication/">MongoDB replica set</a>. It’s trivial to do this with the mongodb Juju charm:<br /><blockquote class="tr_bq">juju deploy -n 3 mongodb</blockquote><br />Wait a little while and you’ll have a 3-node MongoDB replica set. If a node happens to disappear, then the replica set will rejig itself so that there is a master (if the master was in fact lost) and everything should continue to work. If all the nodes go away, then you’re in trouble. This is where you want to go a step further and ensure your nodes are distributed across availability zones for greater resilience to failure. As of Juju 1.20, that “juju deploy” you just did handles that all for you: your 3 nodes will be uniformly spread across availability zones in the environment. If you add units to the service, they will also be spread across the zones according to how many other units of the service are in the zones. Let’s see what Juju did…<br /><blockquote class="tr_bq">$ juju status mongodb | grep instance-id<br />instance-id: i-7a6d2b50<br />instance-id: i-ff1562d4<br />instance-id: i-627f0a30</blockquote><blockquote class="tr_bq">$ ec2-describe-availability-zones<br />AVAILABILITYZONE us-east-1a available us-east-1<br />AVAILABILITYZONE us-east-1b available us-east-1<br />AVAILABILITYZONE us-east-1d available us-east-1</blockquote><blockquote class="tr_bq">$ ec2-describe-instance-status i-7a6d2b50 i-ff1562d4 i-627f0a30 | grep i-<br />INSTANCE i-627f0a30 us-east-1d running 16 ok ok active<br />INSTANCE i-ff1562d4 us-east-1a running 16 ok ok active<br />INSTANCE i-7a6d2b50 us-east-1b running 16 ok ok active</blockquote><blockquote class="tr_bq">(Note: the ec2-* commands are available in the ec2-api-tools package.)</blockquote><br />Juju has distributed the mongodb units so that there is one in each zone, so if one zone is impaired the others will be unaffected. If we add a unit, it will go into one of the zones with the fewest mongodb units.<br /><br />Explicit placement is currently only supported by Juju’s Amazon EC2 and OpenStack providers, but automatic spread is also supported by the Microsoft Azure provider. Due to the way that Microsoft Azure ties together availability zones and load balancing, it is currently necessary to forego “density” (i.e. explicit machine placement) in order to support automatic spread. If you are upgrading an existing environment to 1.20, then automatic spread will not be enabled. Newly created environments enable spread (and disable placement) by default, with an option to disable (availability-sets-enabled=false in environments.yaml).<br /><br />Enjoy.<br /><br /></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

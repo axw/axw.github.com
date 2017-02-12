@@ -1,0 +1,24 @@
+title = "awilkins.id.au"
+baseurl = "https://awilkins.id.au/"
+languageCode = "en"
+theme = "hemingway-axw"
+googleAnalytics = "UA-17223840-3"
+
+[params]
+
+[params.highlight]
+style = "github"
+languages = ["go", "python"]
+
+[[params.social]]
+url = "https://github.com/axw"
+fa_icon = "fa-github"
+
+[[params.social]]
+url = "https://twitter.com/yayxw"
+fa_icon = "fa-twitter"
+
+[[params.social]]
+url = "/index.xml"
+fa_icon = "fa-rss"
+

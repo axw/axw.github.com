@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>It&#39;s Alive! | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">August 4, 2011</h2>
+    <h1 class="title">It&#39;s Alive!</h1>
+    <div class="content">
+      <div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-jl8Gc0mJxhs/Tjo8xWNN1GI/AAAAAAAAA3Q/b5uOaYDRV98/s1600/Its_Alive.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-jl8Gc0mJxhs/Tjo8xWNN1GI/AAAAAAAAA3Q/b5uOaYDRV98/s1600/Its_Alive.jpg" /></a></div><br />I've been quietly hacking away on <a href="http://github.com/axw/cmonster"><b>cmonster</b>&nbsp;</a>(née csnake). I like this name even more: I think it describes my creation better. If you thought preprocessors were horrible before, well...<br /><br /><br /><span class="Apple-style-span" style="font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size: large;"><b>What is cmonster?</b></span><br /><br />cmonster is a C preprocessor with a few novel features on top of the standard fare:<br /><br /><ul><li>Allows users to define function macros in Python, inline.</li><li>Allows users to define a callback for locating #include files, when the file can not be found in the specified include directories.</li><li>Provides a Python API for iterating over tokens in the output stream.</li></ul><div>cmonster is built on top of <a href="http://clang.llvm.org/">Clang</a>, a modern C language family compiler, which contains a reusable, programmable preprocessor. At present, cmonster requires Clang 3.0 APIs, which has not yet been released. I have been working off Clang's subversion trunk.</div><div><br /></div><div>I have just uploaded a binary distribution of the <a href="http://pypi.python.org/pypi/cmonster/0.1">first alpha version (0.1) of cmonster</a> to pypi. I have only built/tested it on Linux 32-bit, Python 3.2, and I don't expect it will work on anything else yet. If you want to play around with it, you can install cmonster using "easy_install cmonster" or by grabbing it off pypi and installing it manually.<br /><br /><br /><span class="Apple-style-span" style="font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size: large;"><b>Demonstration</b></span><br /><br />Seeing is believing - how does this thing work? We'll ignore everying except for inline Python macros for now, because that's the most stable part of the API.<br /><br /><br /><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">It is possible to define macros inline in cmonster, using the builtin "py_def" macro. For example:</div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div><pre class="brush:py" style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">py_def(factorial(n))<br />    import math<br />    return str(math.factorial(int(str(n))))<br />py_end<br /></pre><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">When cmonster sees this, it will grab everything up to "py_end", and define a Python function. It will also create a preprocessor macro with the function's name (as given in the py_def heading), and this macro will be directed to call the Python function.&nbsp;The Python function will be passed the argument tokens that the macro was invoked with. It can return either a sequence of tokens, or a string that will subsequently be tokenised.</div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div></div><div><br /></div><div><span class="Apple-style-span" style="font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size: large;"><b>Addressing Shortcomings</b></span></div><div><br /></div><div>In my<a href="http://blog.awilkins.id.au/2011/06/c-preprocessor-macros-in-python.html"> previous post about csnake</a>&nbsp;I mentioned a few things that needed to be done. I have addressed some of these things in cmonster:<br /><br /></div><blockquote><span class="Apple-style-span" style="font-family: Arial, Tahoma, Helvetica, FreeSans, sans-serif; font-size: 13px; line-height: 18px;"><i>A way of detecting (or at least configuring) pre-defined macros and include paths for a target compiler/preprocessor. A standalone C preprocessor isn't worth much. It needs to act like or delegate to a real preprocessor, such as GCC.</i></span></blockquote>&nbsp;I have added support for emulating GCC. This is done by consulting GCC for its predefined macros (using "gcc -dM"), and using the new "include locator" callback feature. By setting an include locator callback on a cmonster preprocessor, you provide cmonster with a second-chance attempt at locating an include file when the file can not be found in the specified include directories. This method can be used to determine GCC's system include directories: whenever we can't find an include file, we consult GCC and add parse the output to determine the location of the file on disk. I intend to add support for more (common) compilers/preprocessors in the future. Namely, MSVC.<br /><br />I had another crazy idea for (ab)using include locators: handling specially formatted #include directives to feed off-disk files into the preprocessor. Buh? I mean, say, the ability to pull down headers from a hosted repository such as github (e.g. #include &lt;github.yourproject/header.h&gt;), and feeding them into the preprocessor as in-memory files. Or generating headers on the fly (e.g. #include &lt;myapi.proto&gt;, to automatically generate and include <a href="http://code.google.com/p/protobuf/">Protobuf</a> headers).<br /><br /><blockquote><span class="Apple-style-span" style="font-family: Arial, Tahoma, Helvetica, FreeSans, sans-serif; font-size: 13px; line-height: 18px;"><i>A #pragma to define Python macros in source, or perhaps if I'm feeling adventurous, something like #pydefine.</i></span></blockquote>Support for inline Python macros has been implemented: see the "Demonstration" section above. It's unlikely I'll attempt to create a #pydefine, as it would be more work than it's worth.<br /><br /><br /><blockquote><span class="Apple-style-span" style="font-family: Arial, Tahoma, Helvetica, FreeSans, sans-serif; font-size: 13px; line-height: 18px;"><i>A simple command line interface with the look and feel of a standard C preprocessor</i></span></blockquote>The distribution now contains a "cmonster" script, which invokes the preprocessor on a file specified on the command-line. This will need a lot of work: presently you can't add user include directories or (un)define macros. Neither of these things are difficult to add, they just haven't been top priorities.<br /><br /><br /><b><span class="Apple-style-span" style="font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size: large;">Future Work</span></b><br /><div><br /></div>Still remaining to do (and sticking out like sore thumbs) are unit-tests and documentation. Now that I've got something vaguely usable, I will be working on those next.<br /><div><br /></div><div>Once I've tested, documented and stabilised the API, I'll look at (in no definite order):</div><div><ul><li>Improvement the command line interface. Add the standard "-I", "-D" and "-U" parameters.</li><li>Portability. Probably Windows first, since it's common and I have access to it.</li><li>Emulation of additional preprocessors.</li><li>Passing in-memory files ("file like" Python objects) to #include.</li></ul></div>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+
