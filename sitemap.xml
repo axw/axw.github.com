@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://awilkins.id.au/post/juju-2.1-prometheus/</loc>
+    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/old-posts/</loc>
+    <lastmod>2016-12-31T15:30:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/availability-zones-in-juju/</loc>
+    <lastmod>2014-08-19T10:49:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-on-ssa/</loc>
+    <lastmod>2014-01-06T22:02:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-update-14/</loc>
+    <lastmod>2013-08-16T22:55:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-on-go-1.1/</loc>
+    <lastmod>2013-05-18T21:28:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-update-12/</loc>
+    <lastmod>2013-03-01T21:50:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/go-in-the-browser-llgo-does-pnacl/</loc>
+    <lastmod>2012-12-09T12:45:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-update-10-hello-world-redux/</loc>
+    <lastmod>2012-11-25T14:28:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-update-milestone/</loc>
+    <lastmod>2012-09-09T18:26:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/gocov-llgo-update/</loc>
+    <lastmod>2012-07-21T22:09:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/unit-testing-llgos-runtime/</loc>
+    <lastmod>2012-06-03T15:53:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/an-llgo-runtime-emerges/</loc>
+    <lastmod>2012-04-28T15:44:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-update-go1-automated-tests/</loc>
+    <lastmod>2012-04-08T21:44:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/imports-in-llgo-jr./</loc>
+    <lastmod>2012-02-19T13:50:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/llgo-back-in-business/</loc>
+    <lastmod>2012-02-11T21:05:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/cmonster-0.2-released/</loc>
+    <lastmod>2012-01-07T21:20:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/imports-in-llgo/</loc>
+    <lastmod>2011-12-03T12:26:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/writing-a-compiler-or-learning-a-language-the-hard-way-part-deux/</loc>
+    <lastmod>2011-11-07T11:49:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/writing-a-compiler-or-learning-a-language-the-hard-way/</loc>
+    <lastmod>2011-10-23T15:16:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/c-source-to-source-translation/</loc>
+    <lastmod>2011-10-07T12:01:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/cmonster-update/</loc>
+    <lastmod>2011-09-25T14:30:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/hello-mr.-hooker./</loc>
+    <lastmod>2011-09-05T22:04:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/google-app-engine-agent/</loc>
+    <lastmod>2011-09-01T23:01:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/its-alive/</loc>
+    <lastmod>2011-08-04T15:56:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/controlling-remote-agents-from-google-app-engine/</loc>
+    <lastmod>2011-07-17T12:57:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/le-sigh/</loc>
+    <lastmod>2011-06-21T22:32:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/inline-python-macros-in-c/</loc>
+    <lastmod>2011-06-18T16:38:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/name-clash/</loc>
+    <lastmod>2011-06-15T20:48:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/c-preprocessor-macros-in-python/</loc>
+    <lastmod>2011-06-11T17:50:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/pushy-0.5-released/</loc>
+    <lastmod>2011-05-23T19:26:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/fabric-and-pushy-together-at-last/</loc>
+    <lastmod>2011-03-09T21:47:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/pushy-0.4-released/</loc>
+    <lastmod>2011-03-05T16:04:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/java-pushy-api/</loc>
+    <lastmod>2011-02-10T20:42:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/facebook-puzzles/</loc>
+    <lastmod>2011-02-06T10:54:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/pushy-public-documentation/</loc>
+    <lastmod>2010-08-07T13:40:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/java-to-python/</loc>
+    <lastmod>2010-07-10T17:09:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/blogger/first-post/</loc>
+    <lastmod>2010-06-30T15:39:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/go/</loc>
+    <lastmod>2012-11-25T14:28:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/gollvm/</loc>
+    <lastmod>2012-04-08T21:44:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/google-app-engine/</loc>
+    <lastmod>2011-09-01T23:01:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/java/</loc>
+    <lastmod>2011-02-10T20:42:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/juju/</loc>
+    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/llgo/</loc>
+    <lastmod>2012-11-25T14:28:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/llvm/</loc>
+    <lastmod>2012-11-25T14:28:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/post/</loc>
+    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/pushy/</loc>
+    <lastmod>2012-02-11T21:05:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/pushy-python-java/</loc>
+    <lastmod>2010-06-30T15:39:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/python/</loc>
+    <lastmod>2011-09-01T23:01:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/rpc/</loc>
+    <lastmod>2011-09-01T23:01:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/tags/xmpp/</loc>
+    <lastmod>2011-09-01T23:01:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://awilkins.id.au/</loc>
+    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

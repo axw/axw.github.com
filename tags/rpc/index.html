@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rpc | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <article>
+      <h1 class="title"><a href="https://awilkins.id.au/post/blogger/google-app-engine-agent/">Google App Engine Agent</a></h1>
+      <div class="content">
+        <p>A couple of months ago I wrote about <a href="http://blog.awilkins.id.au/2011/07/controlling-remote-agents-from-google.html">my foray into the world of Google App Engine</a>. More recently, I&rsquo;d gotten the itch again, and had some ideas of how to fix the problems I found when attempting to get <a href="http://awilkins.id.au/pushy/">Pushy </a>to work in&nbsp;Google App Engine.<br /><br />The root of most of the problems is that&nbsp;Google App Engine&nbsp;is stateless in nature. Server instances can be spun up or spun down without notice, and so we can&rsquo;t store complex state, which Pushy really requires. So a couple of weeks ago I set to investigating implementing a server-initiated RPC mechanism that is asynchronous and (mostly) stateless.<br /><br />How would it work? Well, earlier this year I read that <a href="http://googleappengine.blogspot.com/2011/04/introducing-protorpc-for-writing-app.html">ProtoRPC was released</a>, which brought RPC services to Google App Engine. In our case, Google App Engine is the client, and is calling the agent - but we can at least reuse the API to minimise dependencies and hopefully simplify the mechanism. Okay, so we have a ProtoRPC service running on a remote machine, consumed by our Google App Engine application. How do they talk?<br /><br />One thing I wanted to avoid was the need for polling, as that&rsquo;s both slow and expensive. Slow in that there will necessarily be delays between polls, and expensive in that unnecessary polls will burn CPU cycles in Google App Engine, which aren&rsquo;t free. Long-polling isn&rsquo;t possible, either, since HTTP requests are limited to 30 seconds of processing time. If you read my last post, you probably already know what I&rsquo;m going to say: we&rsquo;ll use XMPP.<br /><br />What&rsquo;s XMPP? That&rsquo;s the <a href="http://xmpp.org/">Extensible Messaging and Presence Protocol</a>, which is the protocol underlying Jabber. It is also the primary protocol that Google Talk is built on. It&rsquo;s an XML-based, client-server protocol, so peers do not talk directly to each other. It&rsquo;s also asynchronous. So let&rsquo;s look at the picture so far&hellip;<br /><br /><ul><li>The client (agent) and server (GAE application) talk to each other via XMPP.</li><li>The agent serves a ProtoRPC service, and the GAE application will consume it.</li></ul><div>Because our RPC mechanism will be server-initiated, we&rsquo;ll need something else: agent availability discovery. Google App Engine provides XMPP handlers for agent availability (and unavailability) notification. When an agent starts up it will register its presence with the application. When agent is discovered, the application will request the agent&rsquo;s service descriptor. The agent will respond, and the application will store it away in Memcache.</div><div><br /></div><div>We (ab)use Memcache for sharing of data between instances of the application. When you make enough requests to the application, Google App Engine may dynamically spin up a new instance to handle requests. By storing the service descriptor in Memcache, it can be accessed by any instance. I said abuse because Memcache is not guaranteed to keep the data you put in it - it may be expelled when memory is constrained. Really we should use Datastore, but I was too lazy to deal with cleaning it up. &ldquo;Left as an exercise for the reader.&rdquo; One thing I did make a point of using was to use the <a href="http://goo.gl/cWCFe">new Python Memcache CAS API</a>, which allows for safe concurrent updates to Memcache.</div><div><br /></div><div>Orrite. So now we have an agent and application which talk to each other via XMPP, using ProtoRPC. The application discovers the agent, and, upon request, the agent describes its service to the application. How can we use it? Well the answer is really &ldquo;however you like&rdquo;, but I have created a toy web UI for invoking the remote service methods.</div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-zkjIreamSFI/Tl-XUqoJCcI/AAAAAAAAA5E/NABDROL0wmM/s1600/gaea-ui.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="184" src="http://4.bp.blogspot.com/-zkjIreamSFI/Tl-XUqoJCcI/AAAAAAAAA5E/NABDROL0wmM/s320/gaea-ui.png" width="320" /></a></div><div><br /></div><div>Wot &lsquo;ave we &lsquo;ere then? The drop-down selection has all of the available agent JIDs (XMPP IDs). The textbox has some Python code, which will be executed by the Google App Engine application. Yes, security alert! This is just a demonstration of how we can use the RPC mechanism - not a best practice. When you hit &ldquo;Go!&rdquo;, the code will be run by the application. But before doing so, the application will set a local variable &ldquo;agent&rdquo;, which is an instance of the ProtoRPC service stub bound to the agent selected in the drop-down.</div><div><br /></div><div>ProtoRPC is intended to be synchronous (from the looks of the comments in the code, anyway), but there is an asynchronous API for clients. But given that application requests can only take up to 30 seconds to service a request, our application can&rsquo;t actively wait for a response. What to do? Instead, we need to complete the request asynchronously when the client responds, and convey some context to the response handler so it knows what to do with it.</div><div><br /></div><div>In the demo, I&rsquo;ve done something fairly straight forward with regards to response handling. When the UI is rendered, we create an asynchronous channel using the Channel API. We use this to send the response back to the user. So when the code is executed, the service stub is invoked, and the channel ID is passed as context to the client. When the client responds, it includes the context. Once again, security alert. We could fix security concerns by encrypting the context to ensure the client doesn&rsquo;t tamper with it. Let&rsquo;s just assume the client is friendly though, okay? Just this once!</div><div><br /></div><div>So we finally have an application flow that goes something like this:</div><div><ol><li>Agent registers service.</li><li>Server detects agent&rsquo;s availability, and requests client&rsquo;s service descriptor.</li><li>Client sends service descriptor, server receives and stores it in Memcache.</li></ol></div><div>and then&hellip;</div><div><ol><li>User hits web UI, which server renders with a new channel.</li><li>User selects an agent and clicks &ldquo;Go!&rdquo;.</li><li>Server instantiates a service stub, and invokes it with the channel ID as context. The invocation sends an XMPP message to the agent.</li><li>Agent receives XMPP message, decodes and executes the request. The response is sent back to the server as an XMPP message, including the context set by the server.</li><li>The server receives the response, and extracts the response and channel ID (context). The response is formatted and sent to the channel.</li><li>The web UI&rsquo;s channel Javascript callback is invoked and the response is rendered.</li></ol></div><div><br /></div><div style="text-align: center;"><b><i>Fin</i></b></div><div><br /></div><div>I&rsquo;ve put my code up on GitHub, here:&nbsp;<a href="http://github.com/axw/gaea">http://github.com/axw/gaea</a>.&nbsp;Feel free to fork and/or have a play.&nbsp;I hope this can be of use to someone. If nothing else, I&rsquo;ve learnt a few new tricks!</div></p>
+
+      </div>
+      <h2 class="subtitle is-6">
+      Posted September 1, 2011.
+      Tags:   <a href="/tags/google-app-engine">google app engine</a> ,  <a href="/tags/python">python</a> ,  <a href="/tags/rpc">rpc</a> ,  <a href="/tags/xmpp">xmpp</a>.
+      </h2>
+    </article>
+    
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-left"></i>
+            </span>
+            Newer
+          </a>
+          
+        </div>
+      </div>
+      <div class="level-right is-marginless">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            Older
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

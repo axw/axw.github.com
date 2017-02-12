@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fabric and Pushy, together at last | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">March 9, 2011</h2>
+    <h1 class="title">Fabric and Pushy, together at last</h1>
+    <div class="content">
+      <p>A workmate of mine recently brought <a href="http://fabfile.org/">Fabric </a>to my attention. If you&rsquo;re not familiar with Fabric, it is a command-line utility for doing sys-admin type things over SSH. There&rsquo;s an obvious overlap with <a href="http://awilkins.id.au/pushy/">Pushy</a> there, so I immediately thought, &ldquo;Could Pushy be used to back Fabric? What are the benefits, what are the downsides?&rdquo;<div><br /></div><div>A couple of fairly significant benefits:<br /><div><ul><li>Pushy does more than just SSH, so Fabric could conceivably be made to support additional transports by using Pushy (which uses Paramiko), rather than using Paramiko directly.</li><li>Pushy provides access to the entire Python standard library, which is largely platform independent. So you could do things like determine the operating system name without using &ldquo;uname&rdquo;, which is a *NIX thing. That&rsquo;s a trivialisation, but you get the idea I&rsquo;m sure.</li></ul>One big fat con:<br /><ul><li>Pushy absolutely requires Python on the remote system (as well as SSH, of course, but Fabric requires that anyway.) So requiring Pushy would mean that Fabric would be restricted to working only with remote machines that have Python installed. Probably a safe bet in general, but not ideal.</li></ul><div>How about using Pushy if Python is available, and just failing gracefully if it doesn&rsquo;t? This turns out to be really easy to do, since Fabric and Pushy both use Paramiko. So I wrote a Fabric &ldquo;<a href="http://docs.fabfile.org/en/1.0.0/api/core/operations.html">operation</a>&rdquo; to import a remote Python module. Under the covers, this piggy-backs a Pushy connection over the existing Paramiko connection created by Fabric. I&rsquo;ll bring this to the attention of the Fabric developers, but I thought I&rsquo;d just paste it here for now.</div></div></div><br /><div>First an example of how one might use the &ldquo;remote_import&rdquo; operation. Pass it a module name, and you&rsquo;ll get back a reference to the remote module. You can then use the module as you would use the module as if you had done a plain old &ldquo;import <module>&rdquo;.<br /></div><br /><div><h3>fabfile.py</h3><pre class="brush: python">from fabric_pushy import remote_import<br /><br />def get_platform():<br />    platform = remote_import(&ldquo;platform&rdquo;)<br />    print platform.platform()<br /></pre></div><br /><div>You just execute your fabfile as per usual, and the &ldquo;remote_import&rdquo; operation will create a Pushy connection to each host, import the remote Python interpreter&rsquo;s standard <a href="http://docs.python.org/library/platform.html">platform</a> module, and call its platform method to determine its platform name. Easy like Sunday morning&hellip;<br /><pre>    $ fab -H localhost get_platform<br />    [localhost] Executing task &lsquo;get_platform&rsquo;<br />    Linux-2.6.35-27-generic-i686-with-Ubuntu-10.10-maverick<br /><br />    Done.<br />    Disconnecting from localhost&hellip; done.<br /></pre></div><br /><div><h3>fabric_pushy.py</h3><pre class="brush: python">from fabric.state import env, default_channel<br />from fabric.network import needs_host<br /><br />import pushy<br />import pushy.transport<br />from pushy.transport.ssh import WrappedChannelFile<br /><br />class FabricPopen(pushy.transport.BaseTransport):<br />    &ldquo;&rdquo;&rdquo;<br />    Pushy transport for Fabric, piggy-backing the Paramiko SSH connection<br />    managed by Fabric.<br />    &ldquo;&rdquo;&rdquo;<br /><br />    def <strong>init</strong>(self, command, address):<br />        pushy.transport.BaseTransport.<strong>init</strong>(self, address)<br /><br />        # Join arguments into a string<br />        args = command<br />        for i in range(len(args)):<br />            if &ldquo; &rdquo; in args[i]:<br />                args[i] = &ldquo;&lsquo;%s&rsquo;&rdquo; % args[i]<br />        command = &ldquo; &ldquo;.join(args)<br /><br />        self.<strong>channel = default_channel()<br />        self.</strong>channel.exec_command(command)<br />        self.stdin  = WrappedChannelFile(self.<strong>channel.makefile(&ldquo;wb&rdquo;), 1)<br />        self.stdout = WrappedChannelFile(self.</strong>channel.makefile(&ldquo;rb&rdquo;), 0)<br />        self.stderr = self.__channel.makefile_stderr(&ldquo;rb&rdquo;)<br /><br />    def <strong>del</strong>(self):<br />        self.close()<br /><br />    def close(self):<br />        if hasattr(self, &ldquo;stdin&rdquo;):<br />            self.stdin.close()<br />            self.stdout.close()<br />            self.stderr.close()<br />        self.__channel.close()<br /><br /># Add a &ldquo;fabric&rdquo; transport&rdquo;, which piggy-backs the existing SSH connection, but<br /># otherwise operates the same way as the built-in Paramiko transport.<br />class pseudo_module:<br />    Popen = FabricPopen<br />pushy.transports[&ldquo;fabric&rdquo;] = pseudo_module<br /><br />###############################################################################<br /><br /># Pushy connection cache<br />connections = {}<br /><br />@needs_host<br />def remote_import(name, python=&ldquo;python&rdquo;):<br />    &ldquo;&rdquo;&rdquo;<br />    A Fabric operation for importing and returning a reference to a remote<br />    Python package.<br />    &ldquo;&rdquo;&rdquo;<br /><br />    if (env.host_string, python) in connections:<br />        conn = connections[(env.host_string, python)]<br />    else:<br />        conn = pushy.connect(&ldquo;fabric:&ldquo;, python=python)<br />        connections[(env.host_string, python)] = conn<br />    m = getattr(conn.modules, name)<br />   if &ldquo;.&rdquo; in name:<br />        for p in name.split(&ldquo;.&rdquo;)[1:]:<br />            m = getattr(m, p)<br />    return m<br /></pre></div></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

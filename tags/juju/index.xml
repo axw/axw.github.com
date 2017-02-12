@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Juju on awilkins.id.au</title>
+    <link>https://awilkins.id.au/tags/juju/index.xml</link>
+    <description>Recent content in Juju on awilkins.id.au</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <atom:link href="https://awilkins.id.au/tags/juju/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>New in Juju 2.1: Prometheus Metrics</title>
+      <link>https://awilkins.id.au/post/juju-2.1-prometheus/</link>
+      <pubDate>Mon, 06 Feb 2017 17:52:06 +0800</pubDate>
+      
+      <guid>https://awilkins.id.au/post/juju-2.1-prometheus/</guid>
+      <description>
+
+&lt;p&gt;&lt;a href=&#34;https://jujucharms.com/&#34;&gt;Juju&lt;/a&gt; is an application modelling tool,
+enabling &amp;ldquo;model-driven operations&amp;rdquo;. I won&amp;rsquo;t go into detail about
+what Juju is in this blog post, so if you&amp;rsquo;re new to Juju I suggest
+clicking on the link and reading a bit more.&lt;/p&gt;
+
+&lt;p&gt;Juju is a distributed application, with a &amp;ldquo;controller&amp;rdquo; cluster that
+manages cloud resources (machines, networks, volumes, etc.), and
+applications that use those resources. The controller cluster is
+currently based on top of MongoDB, utilising replica sets for data
+replication and leadership election.&lt;/p&gt;
+
+&lt;p&gt;As well as the controller cluster, Juju agents run on every virtual
+machine that the controller manages. The controllers, and those agents,
+each run many fine-grained, but dedicated &amp;ldquo;workers&amp;rdquo;. For example,
+each agent runs a worker to detect block devices and publish that
+information to the controller cluster; each controller runs a worker
+to maintain the replica sets in MongoDB.&lt;/p&gt;
+
+&lt;p&gt;Many things can go wrong in a distributed system. Network partitions
+can cause system-wide failures. Bad actors (badly written; less often,
+malicious) may starve others of resources. Failure to release memory
+or file handles leads to exhaustion, causing a DoS. Juju has seen its
+fair share of each of these problems.&lt;/p&gt;
+
+&lt;p&gt;To combat such issues, we have recently added Prometheus monitoring to
+Juju. As of Juju 2.1, Juju controllers and agents will export Prometheus
+metrics. There are two ways to get at them:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;(on controllers) an HTTPS endpoint, https://&amp;hellip;:17070/introspection/metrics.&lt;/li&gt;
+&lt;li&gt;(on Linux agents) an abstract domain socket, @jujud-machine-&amp;lt;machine-ID&amp;gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://awilkins.id.au/images/prometheus-juju-metrics.png&#34; alt=&#34;Juju metrics available from Prometheus&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;configuring-prometheus-to-scrape-juju-controllers&#34;&gt;Configuring Prometheus to scrape Juju controllers&lt;/h2&gt;
+
+&lt;p&gt;To configure Prometheus to scrape metrics from Juju controllers, you will
+need to add a new scrape target to Prometheus. The metrics endpoint requires
+authorisation, so you will need to configure a user and password for
+Prometheus to use:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ juju add-user prometheus
+$ juju change-user-password prometheus
+new password: &amp;lt;password&amp;gt;
+type new password again: &amp;lt;password&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;For this new &amp;ldquo;prometheus&amp;rdquo; user to be able to access the metrics endpoint,
+you must grant the user read access to the controller model:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ juju grant prometheus read controller
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This gives the prometheus user just enough permission to read information
+on the controller, without allowing it to make changes, which would not
+be ideal for a monitoring application.&lt;/p&gt;
+
+&lt;p&gt;Juju serves the metrics over HTTPS, currently with no option of degrading
+to HTTP. You can configure your Prometheus to skip validation, or you can
+store the controller’s CA certificate in a file for Prometheus to verify
+the server’s certificate against:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ juju controller-config ca-cert &amp;gt; /path/to/juju-ca.crt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We can now add a scrape target to Prometheus. Modify prometheus.yml, adding
+the following scrape target:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;scrape_configs:
+  job_name: juju
+    metrics_path: /introspection/metrics
+    scheme: https
+    static_configs:
+      targets: [&#39;&amp;lt;controller-address&amp;gt;:17070&#39;]
+    basic_auth:
+      username: user-prometheus
+      password: &amp;lt;password&amp;gt;
+    tls_config:
+      ca_file: /path/to/juju-ca.crt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://awilkins.id.au/images/prometheus-juju-api-requests-total.png&#34; alt=&#34;Juju API requests total metric&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;configuring-prometheus-to-scrape-juju-agents&#34;&gt;Configuring Prometheus to scrape Juju agents&lt;/h2&gt;
+
+&lt;p&gt;To expose the metrics of agents, you can deploy the &lt;a href=&#34;https://jujucharms.com/u/axwalk/juju-introspection&#34;&gt;juju-introspection&lt;/a&gt;
+charm onto that agent&amp;rsquo;s machine. For example, on machine 1, you would
+run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;juju deploy ~axwalk/juju-introspection --to 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The metrics of that agent can then be obtained via:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;http://&amp;lt;machine-1-address&amp;gt;:19090/agents/machine-1/metrics
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that this is not an officially supported charm. The code for it is available at:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/axw/juju-introspection-charm&#34;&gt;https://github.com/axw/juju-introspection-charm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/axw/juju-introspection-proxy&#34;&gt;https://github.com/axw/juju-introspection-proxy&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

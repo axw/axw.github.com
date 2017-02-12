@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>llgo update, milestone | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">September 9, 2012</h2>
+    <h1 class="title">llgo update, milestone</h1>
+    <div class="content">
+      <p>In between gallivanting in <a href="http://en.wikipedia.org/wiki/Sydney">Sydney</a>, working, and organising to have a new house built, I&rsquo;ve squeezed in a little bit of work on llgo. If you&rsquo;ve been following along on Github, you&rsquo;ll have seen that things have progressed a bit since last time I wrote.<br /><br />Aside from a slew of bug fixes and trivialities, llgo now implements:<br /><br /><ul><li>Slice operations (make, append, slice expressions). I&rsquo;ve only implemented single-element appends so far, i.e. No <i>append(s, a, b, c, &hellip;)</i> or <i>(s, abc&hellip;)</i> yet.</li><li>Named results in functions.</li><li>Maps - creation, indexing, assignment, and deletion. The underlying implementation is just a dumb linked-list at this point in time. I&rsquo;ll implement it as a hash map in the future, when there aren&rsquo;t more important things to implement.</li><li>Range statements for arrays, slices and maps. I haven&rsquo;t done strings yet, simply because it requires a bit more thought into iterating through strings runes-at-a-time. I don&rsquo;t expect it&rsquo;ll be too much work.</li><li>Branch statements, except for goto. You can now break, continue, and fallthrough.</li><li>String indexing, and slicing.</li><li>Function literals. Once upon a time these were working, but they haven&rsquo;t been for a while. Now they are again. Note that this does not include support for closures at this stage, so usefulness is pretty limited.</li></ul><br />Early on in the development of llgo, I decided that rather than implementing the compiler by going through the specification one item at a time, I&rsquo;d drive the development by attempting to compile a real program. For this, I chose <a href="https://code.google.com/p/go/source/browse/src/pkg/unicode/maketables.go">maketables</a>, a program from the <i>unicode</i>&nbsp;standard library package. As of today, llgo can successfully compile the program. That is, it compiles that specific&nbsp;<i>file,</i> maketables.go. It doesn&rsquo;t yet compile all of its dependencies, and it certainly doesn&rsquo;t link or produce a usable program.<br /><br />So now I&rsquo;ll be working towards getting all of the dependencies compiling, then linking. In the interest of seeing usable progress, I think I might now take a bottom-up approach and start focusing on the core libraries, like <i>runtime</i> and <i>syscall</i>. I&rsquo;ll report back when I have something interesting to say.<br /><br /></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

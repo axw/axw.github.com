@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>llgo update #14 | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">August 16, 2013</h2>
+    <h1 class="title">llgo update #14</h1>
+    <div class="content">
+      <p>Ahoy there, mateys!<br /><br />It&rsquo;s been three months since our last correspondence. Apologies for the negligence. I&rsquo;ve been busy, as usual, but it&rsquo;s more self-inflicted than usual. I&rsquo;ve taken up a new role at Canonical, working on <a href="http://juju.ubuntu.com/">Juju</a>.&nbsp;I&rsquo;m really excited about Juju (both the concept and realisation), and the fact that it&rsquo;s written in Go is icing on the cake. Working remotely is taking some getting used to, but so far it&rsquo;s been pretty swell. Anyway, you didn&rsquo;t come here to read about that, did you?<br /><br />I&rsquo;m still working on <a href="http://github.com/axw/llgo">llgo</a> in the background, quietly prodding it along towards the <a href="https://github.com/axw/llgo/issues?milestone=1&amp;state=open">0.1 milestone</a>. There&rsquo;s just one big ticket item left, and that&rsquo;s partially done now: channels. I&rsquo;ve just finished porting the basics of channels from gc&rsquo;s standard library to llgo&rsquo;s runtime. That doesn&rsquo;t include select, which is entirely missing. When that&rsquo;s done, I&rsquo;ll be content to release 0.1.<br /><br />So what&rsquo;s new since last time?<br /><br /><ul><li>There&rsquo;s a new llgo-build tool, which takes the pain out of building packages and programs with llgo and the LLVM toolchain. Just run &ldquo;llgo-build &lt;package&gt;&rdquo;, and you&rsquo;ll either build and install a package, or build a program in the working directory. There&rsquo;s no freshness checking, so you&rsquo;re currently required to manually build all dependencies before building a program.</li><li>Simplified building against PNaCl: llgo-dist now accepts a &ldquo;-pepper&rdquo; option, which points to a NaCl SDK.</li><li>Implemented support for map literals.</li><li>Implemented complex number arithmetic.</li><li>Implemented channels (apart from anything select-related)</li><li>Numerous bug fixes.</li></ul><div>In my previous post I talked about having implemented panic/recover, and having implemented them in terms of DWARF exception handling. Well, it looks like PNaCl isn&rsquo;t going to support that, at least initially, so a setjmp/longjmp version is likely inevitable now.</div><div><br /></div><div>I also said I would be working on a temporary for of cmd/go. I gave up on that, after hitting a few stumbling blocks. I figured it was more important to actually get the compiler and runtime working than get bogged down in the tooling, hence the simpler llgo-build tool.</div><div><br /></div><div>That&rsquo;s about it! &ldquo;Feature complete&rdquo; is getting closer, though lots of things still don&rsquo;t work very nicely. Still no garbage collection, no proper escape analysis, etc. Those will come in time.</div><div><br /></div><div>For now, though&hellip; I think I might go catch up on some sleep.</div></p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+
