@@ -1,0 +1,7 @@
+[submodule "themes/hemingway-axw"]
+	path = themes/hemingway-axw
+	url = https://github.com/axw/hemingway.git
+[submodule "public"]
+	path = public
+	url = git@github.com:axw/axw.github.com.git
+	branch = master
