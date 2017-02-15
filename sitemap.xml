@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://awilkins.id.au/post/llgo-classic-snap/</loc>
+    <lastmod>2017-02-15T08:00:37+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://awilkins.id.au/post/juju-2.1-prometheus/</loc>
     <lastmod>2017-02-06T17:52:06+08:00</lastmod>
   </url>
@@ -223,7 +228,7 @@
   
   <url>
     <loc>https://awilkins.id.au/tags/llgo/</loc>
-    <lastmod>2012-11-25T14:28:00+00:00</lastmod>
+    <lastmod>2017-02-15T08:00:37+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -235,7 +240,7 @@
   
   <url>
     <loc>https://awilkins.id.au/post/</loc>
-    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+    <lastmod>2017-02-15T08:00:37+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -264,6 +269,12 @@
   </url>
   
   <url>
+    <loc>https://awilkins.id.au/tags/snapcraft/</loc>
+    <lastmod>2017-02-15T08:00:37+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://awilkins.id.au/tags/</loc>
     <priority>0</priority>
   </url>
@@ -276,7 +287,7 @@
   
   <url>
     <loc>https://awilkins.id.au/</loc>
-    <lastmod>2017-02-06T17:52:06+08:00</lastmod>
+    <lastmod>2017-02-15T08:00:37+08:00</lastmod>
     <priority>0</priority>
   </url>
   

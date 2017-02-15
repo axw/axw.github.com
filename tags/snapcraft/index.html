@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snapcraft | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <article>
+      <h1 class="title"><a href="https://awilkins.id.au/post/llgo-classic-snap/">llgo: classic snap</a></h1>
+      <div class="content">
+        <p>Some time ago I created a <a href="https://snapcraft.io/">snap</a> for
+<a href="https://github.com/llvm-mirror/llgo">llgo</a>. Snaps are a
+relatively new packaging format; at the time I created the
+initial snap for llgo, it was only possible to create them
+confined by default. In particular, access to the user&rsquo;s
+filesystem was blocked by default, which is unhelpful for
+a tool like a compiler. Because of that, the initial snap
+did not expose the llgo compiler, only the llgoi interpreter.</p>
+
+<p>Now there is the concept of &ldquo;classic snaps&rdquo;, which use the
+snap packaging format but do not confine the application.
+The resulting package is much more like what you would get
+from a Debian package, but without the arcana.</p>
+
+<p>I have released a new llgo classic snap, exposing the llgoi
+interpreter, and the llgo compiler and &ldquo;go&rdquo; tool wrapper.
+To install the llgo snap, run:</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">sudo snap install --classic llgo
+</pre></div>
+
+
+<p>The exposed &ldquo;llgo&rdquo; command is an alias for the go tool
+wrapper, so you can just run:</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">$ llgo install &lt;package&gt;
+$ llgo run /path/to/source.go
+...
+</pre></div>
+
+
+<p>as you would with the standard go tool. The llgo compiler
+itself can be invoked with the &ldquo;llgo.compiler&rdquo; command:</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">$ llgo.compiler -emit-llvm -S -o -o main.go
+; ModuleID = <span style="font-style: italic">&#39;main&#39;</span>
+source_filename = <span style="font-style: italic">&quot;main&quot;</span>
+target datalayout ...
+</pre></div>
+
+
+<p>The llgoi interpreter is still available, but as it is part
+of the same snap it is no longer confined:</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">$ llgo.llgoi
+(llgo) import <span style="font-style: italic">&quot;fmt&quot;</span>
+(llgo) fmt.Println(<span style="font-style: italic">&quot;hello, world&quot;</span>)
+hello, world
+13
+&lt;nil&gt;
+</pre></div>
+
+
+      </div>
+      <h2 class="subtitle is-6">
+      Posted February 15, 2017.
+      Tags: <a href="/tags/llgo">llgo</a>, <a href="/tags/snapcraft">snapcraft</a>.
+      </h2>
+    </article>
+    
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-left"></i>
+            </span>
+            Newer
+          </a>
+          
+        </div>
+      </div>
+      <div class="level-right is-marginless">
+        <div class="level-item">
+          
+          <a class="button is-disabled">
+            Older
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

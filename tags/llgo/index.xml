@@ -9,6 +9,67 @@
     <atom:link href="https://awilkins.id.au/tags/llgo/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>llgo: classic snap</title>
+      <link>https://awilkins.id.au/post/llgo-classic-snap/</link>
+      <pubDate>Wed, 15 Feb 2017 08:00:37 +0800</pubDate>
+      
+      <guid>https://awilkins.id.au/post/llgo-classic-snap/</guid>
+      <description>&lt;p&gt;Some time ago I created a &lt;a href=&#34;https://snapcraft.io/&#34;&gt;snap&lt;/a&gt; for
+&lt;a href=&#34;https://github.com/llvm-mirror/llgo&#34;&gt;llgo&lt;/a&gt;. Snaps are a
+relatively new packaging format; at the time I created the
+initial snap for llgo, it was only possible to create them
+confined by default. In particular, access to the user&amp;rsquo;s
+filesystem was blocked by default, which is unhelpful for
+a tool like a compiler. Because of that, the initial snap
+did not expose the llgo compiler, only the llgoi interpreter.&lt;/p&gt;
+
+&lt;p&gt;Now there is the concept of &amp;ldquo;classic snaps&amp;rdquo;, which use the
+snap packaging format but do not confine the application.
+The resulting package is much more like what you would get
+from a Debian package, but without the arcana.&lt;/p&gt;
+
+&lt;p&gt;I have released a new llgo classic snap, exposing the llgoi
+interpreter, and the llgo compiler and &amp;ldquo;go&amp;rdquo; tool wrapper.
+To install the llgo snap, run:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;sudo snap install --classic llgo
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The exposed &amp;ldquo;llgo&amp;rdquo; command is an alias for the go tool
+wrapper, so you can just run:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ llgo install &amp;lt;package&amp;gt;
+$ llgo run /path/to/source.go
+...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;as you would with the standard go tool. The llgo compiler
+itself can be invoked with the &amp;ldquo;llgo.compiler&amp;rdquo; command:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ llgo.compiler -emit-llvm -S -o -o main.go
+; ModuleID = &lt;span style=&#34;font-style: italic&#34;&gt;&amp;#39;main&amp;#39;&lt;/span&gt;
+source_filename = &lt;span style=&#34;font-style: italic&#34;&gt;&amp;quot;main&amp;quot;&lt;/span&gt;
+target datalayout ...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The llgoi interpreter is still available, but as it is part
+of the same snap it is no longer confined:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;$ llgo.llgoi
+(llgo) import &lt;span style=&#34;font-style: italic&#34;&gt;&amp;quot;fmt&amp;quot;&lt;/span&gt;
+(llgo) fmt.Println(&lt;span style=&#34;font-style: italic&#34;&gt;&amp;quot;hello, world&amp;quot;&lt;/span&gt;)
+hello, world
+13
+&amp;lt;nil&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+</description>
+    </item>
+    
+    <item>
       <title>llgo update #10: &#34;hello, world!&#34; redux</title>
       <link>https://awilkins.id.au/post/blogger/llgo-update-10-hello-world-redux/</link>
       <pubDate>Sun, 25 Nov 2012 14:28:00 +0000</pubDate>
