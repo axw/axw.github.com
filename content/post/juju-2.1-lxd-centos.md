@@ -1,8 +1,7 @@
 +++
-date = "2017-02-14T20:23:26+08:00"
+date = "2017-02-23T11:50:00+08:00"
 title = "Juju 2.1 and CentOS"
 tags = ["juju", "lxd"]
-draft = true
 +++
 
 In the [Juju](https://jujucharms.com/) 2.1 release, I made a couple of small
