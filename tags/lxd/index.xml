@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lxd on awilkins.id.au</title>
+    <link>https://awilkins.id.au/tags/lxd/index.xml</link>
+    <description>Recent content in Lxd on awilkins.id.au</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <atom:link href="https://awilkins.id.au/tags/lxd/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Juju 2.1 and CentOS</title>
+      <link>https://awilkins.id.au/post/juju-2.1-lxd-centos/</link>
+      <pubDate>Thu, 23 Feb 2017 11:50:00 +0800</pubDate>
+      
+      <guid>https://awilkins.id.au/post/juju-2.1-lxd-centos/</guid>
+      <description>&lt;p&gt;In the &lt;a href=&#34;https://jujucharms.com/&#34;&gt;Juju&lt;/a&gt; 2.1 release, I made a couple of small
+changes to better support CentOS servers.&lt;/p&gt;
+
+&lt;p&gt;The first change was to support &amp;ldquo;manual provisioning&amp;rdquo; of CentOS machines.
+Manual provisioning is when you point Juju at a machine, and Juju connects
+to the machine over SSH and sets it up with a Juju agent. To do this, Juju
+needs to run a small shell script to discover the OS version and hardware
+characteristics of the machine. With a minor change to that script, you can
+now manually provision CentOS machines.&lt;/p&gt;
+
+&lt;p&gt;The second change is to support CentOS LXD images. A small change was needed
+in the Juju code to support the &amp;ldquo;centos7&amp;rdquo; OS version, and alter the way we
+handle local LXD image aliases. If an image exists locally with the expected
+alias (e.g. &amp;ldquo;juju/centos7/amd64&amp;rdquo;), then we&amp;rsquo;ll use that and skip looking in
+the remote image sources. This also improves container startup time when
+you live in a faraway land like me. Altering Juju is not quite enough though,
+as there are no existing CentOS images that Juju can use.&lt;/p&gt;
+
+&lt;p&gt;Juju (mostly) requires &lt;a href=&#34;https://cloudinit.readthedocs.io/&#34;&gt;cloud-init&lt;/a&gt; to be
+present on the machines it starts, so that it can inject Juju-specific configuration
+and scripts to run on startup. Unforunately, there are no CentOS LXD images
+that have cloud-init already. To work around this, I wrote a standalone Go
+program to transform the &lt;a href=&#34;https://linuxcontainers.org&#34;&gt;linuxcontainers.org&lt;/a&gt;
+CentOS image: &lt;a href=&#34;https://github.com/axw/juju-lxd-centos-image-builder&#34;&gt;github.com/axw/juju-lxd-centos-image-builder&lt;/a&gt;.
+Eventually we hope to have pre-canned CentOS LXD images available to Juju,
+but for now you can use this program to prepare an image for Juju. Run it from
+the LXD host, and Juju will be able to use the resulting image.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

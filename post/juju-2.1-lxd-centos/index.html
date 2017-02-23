@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juju 2.1 and CentOS | awilkins.id.au</title>
+<link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/github.min.css">
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+	
+	<a class="nav-item" href="https://awilkins.id.au/">
+	<h1 class="title is-4" style="color: #666666; font-weight: bold">
+	a<span style="color:#4a83d4; font-weight: bold">wilkins</span>.id.<span style="color:#4a83d4; font-weight: bold">au</span>
+	</h1>
+	</a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/axw">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/yayxw">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="/index.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="subtitle is-6">February 23, 2017</h2>
+    <h1 class="title">Juju 2.1 and CentOS</h1>
+    <div class="content">
+      <p>In the <a href="https://jujucharms.com/">Juju</a> 2.1 release, I made a couple of small
+changes to better support CentOS servers.</p>
+
+<p>The first change was to support &ldquo;manual provisioning&rdquo; of CentOS machines.
+Manual provisioning is when you point Juju at a machine, and Juju connects
+to the machine over SSH and sets it up with a Juju agent. To do this, Juju
+needs to run a small shell script to discover the OS version and hardware
+characteristics of the machine. With a minor change to that script, you can
+now manually provision CentOS machines.</p>
+
+<p>The second change is to support CentOS LXD images. A small change was needed
+in the Juju code to support the &ldquo;centos7&rdquo; OS version, and alter the way we
+handle local LXD image aliases. If an image exists locally with the expected
+alias (e.g. &ldquo;juju/centos7/amd64&rdquo;), then we&rsquo;ll use that and skip looking in
+the remote image sources. This also improves container startup time when
+you live in a faraway land like me. Altering Juju is not quite enough though,
+as there are no existing CentOS images that Juju can use.</p>
+
+<p>Juju (mostly) requires <a href="https://cloudinit.readthedocs.io/">cloud-init</a> to be
+present on the machines it starts, so that it can inject Juju-specific configuration
+and scripts to run on startup. Unforunately, there are no CentOS LXD images
+that have cloud-init already. To work around this, I wrote a standalone Go
+program to transform the <a href="https://linuxcontainers.org">linuxcontainers.org</a>
+CentOS image: <a href="https://github.com/axw/juju-lxd-centos-image-builder">github.com/axw/juju-lxd-centos-image-builder</a>.
+Eventually we hope to have pre-canned CentOS LXD images available to Juju,
+but for now you can use this program to prepare an image for Juju. Run it from
+the LXD host, and Juju will be able to use the resulting image.</p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/go.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-17223840-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

@@ -52,6 +52,44 @@
   <div class="container">
     
     <article>
+      <h1 class="title"><a href="https://awilkins.id.au/post/juju-2.1-lxd-centos/">Juju 2.1 and CentOS</a></h1>
+      <div class="content">
+        <p>In the <a href="https://jujucharms.com/">Juju</a> 2.1 release, I made a couple of small
+changes to better support CentOS servers.</p>
+
+<p>The first change was to support &ldquo;manual provisioning&rdquo; of CentOS machines.
+Manual provisioning is when you point Juju at a machine, and Juju connects
+to the machine over SSH and sets it up with a Juju agent. To do this, Juju
+needs to run a small shell script to discover the OS version and hardware
+characteristics of the machine. With a minor change to that script, you can
+now manually provision CentOS machines.</p>
+
+<p>The second change is to support CentOS LXD images. A small change was needed
+in the Juju code to support the &ldquo;centos7&rdquo; OS version, and alter the way we
+handle local LXD image aliases. If an image exists locally with the expected
+alias (e.g. &ldquo;juju/centos7/amd64&rdquo;), then we&rsquo;ll use that and skip looking in
+the remote image sources. This also improves container startup time when
+you live in a faraway land like me. Altering Juju is not quite enough though,
+as there are no existing CentOS images that Juju can use.</p>
+
+<p>Juju (mostly) requires <a href="https://cloudinit.readthedocs.io/">cloud-init</a> to be
+present on the machines it starts, so that it can inject Juju-specific configuration
+and scripts to run on startup. Unforunately, there are no CentOS LXD images
+that have cloud-init already. To work around this, I wrote a standalone Go
+program to transform the <a href="https://linuxcontainers.org">linuxcontainers.org</a>
+CentOS image: <a href="https://github.com/axw/juju-lxd-centos-image-builder">github.com/axw/juju-lxd-centos-image-builder</a>.
+Eventually we hope to have pre-canned CentOS LXD images available to Juju,
+but for now you can use this program to prepare an image for Juju. Run it from
+the LXD host, and Juju will be able to use the resulting image.</p>
+
+      </div>
+      <h2 class="subtitle is-6">
+      Posted February 23, 2017.
+      Tags: <a href="/tags/juju">juju</a>, <a href="/tags/lxd">lxd</a>.
+      </h2>
+    </article>
+    
+    <article>
       <h1 class="title"><a href="https://awilkins.id.au/post/llgo-classic-snap/">llgo: classic snap</a></h1>
       <div class="content">
         <p>Some time ago I created a <a href="https://snapcraft.io/">snap</a> for
@@ -318,18 +356,6 @@ at <a href="https://axwalk.blogspot.com">my old Blogger site</a>.</p>
       <h2 class="subtitle is-6">
       Posted December 9, 2012.
       
-      </h2>
-    </article>
-    
-    <article>
-      <h1 class="title"><a href="https://awilkins.id.au/post/blogger/llgo-update-10-hello-world-redux/">llgo update #10: &#34;hello, world!&#34; redux</a></h1>
-      <div class="content">
-        <p>It&rsquo;s about time for another progress update on llgo. I&rsquo;ve made decent progress recently, so let&rsquo;s go through what&rsquo;s new.<br /><br /><h4>Highlights</h4>I&rsquo;ve been refactoring bits of code and fixing bugs aplenty, so there is a mass of noise in the git commits. In terms of new function, the news is that we now have:<br /><br /><ul><li>Type switches.</li><li>Type assertions.</li><li>Labeled statements; goto, labeled break and continue.</li><li>The <a href="https://github.com/axw/llgo/tree/master/cmd/llgo-dist">llgo-dist</a> command; more on this below.</li><li>String conversions: to/from byte slices; from rune/int.</li><li>String range. I&rsquo;m sure <a href="https://github.com/axw/llgo/blob/master/pkg/runtime/strings.go#L77">the implementation</a>&nbsp;could be improved.</li><li>Implemented <a href="https://github.com/axw/llgo/blob/master/pkg/sync/atomic/atomic.ll">sync/atomic</a> using LLVM atomic operations intrinsics.</li><li>Various changes to enable linking multiple packages (e.g. exported symbols are now prefixed with their package path).</li><li>Additional support for floats (<a href="https://github.com/axw/llgo/pull/11">thanks to spate</a>); partial support for complex numbers.</li><li>&rdquo;&hellip;args&rdquo; calls to variadic functions (including slice append).</li><li>A self-contained runtime package. I have cloned (and slightly modified in some cases) the Go portion of the runtime package from gc, and combined it with the runtime code I had already written for llgo.</li><li><a href="https://github.com/axw/llgo/blob/master/pkg/math/math.ll">Bridge code for the math package,</a> which mostly just redirects the exported functions to the internal, pure-Go implementations.</li><li>System calls (<a href="https://github.com/axw/llgo/blob/master/pkg/syscall/syscall_linux_amd64.ll">Linux/AMD64</a> only so far).</li><li>Closures; more below.</li></ul><div><br /></div><h4>llgo-dist</h4><div>I have begun implementing a command that takes care of building llgo, its runtime, and in the future any other tools that might be considered part of llgo (e.g. an in-development linker). This tool will set up the cgo flags given the path to an &ldquo;llvm-config&rdquo; program, and build gollvm.<br /><br /></div><h4><i>reflect</i>, <i>fmt</i>, oh my!</h4><br />Last week, <a href="https://plus.google.com/u/0/102738380796586573408/posts/LDYxBXHXmHN">I mentioned on Google+</a>&nbsp;that I managed to get the <a href="http://golang.org/pkg/reflect">reflect</a>&nbsp;package working. At least enough of it to get the <a href="http://golang.org/pkg/fmt/">fmt</a>&nbsp;package to work. At least enough of the fmt package to get fmt.Println(&ldquo;Hello, world!&rdquo;) to work&hellip;&nbsp;Yep, the holy grail of programming examples now compiles, links, and runs, using llgo. This demonstrates the following things work:<br /><br /><ol><li>Compilation of the following packages:&nbsp;errors, io, math, os, reflect, runtime, strconv, sync, sync/atomic, syscall, time, unicode/utf8, unsafe.</li><li>Package imports (still using the gcimporter from exp/types.)</li><li>Linking multiple compiled packages using llvm-link.</li><li>Interfaces and reflection (fmt.Println uses reflection to determine the underlying type).</li><li>System calls (fmt.Println will eventually issue a system call to write to the stdout file).</li></ol><br /><h4>Closures</h4>Yes indeed, we now have closures. <a href="https://github.com/axw/llgo/blob/master/literals.go#L70">The code</a> is pretty hackish, so I expect it&rsquo;s not very solid. I have implemented them using LLVM&rsquo;s trampoline intrinsics. Essentially you provide LLVM with a function that takes N parameters, give it a block of (executable) memory and an argument to bind, and it fills in the block with function code for a function with N-1 parameters (the Nth one being bound).<br /><br />Unfortunately I have found that the closures are not playing nicely with lli/JIT, which means the closure unit test I have written fails. If I compile it with llc/gcc, though, it works just fine. So either I&rsquo;ve done something subtly stupid, or the JIT is clobbering something it shouldn&rsquo;t. As far as I got with debugging was finding that the bound argument value is wrong when the function is entered.<br /><br />I expect I&rsquo;ll probably replace this implementation for a couple of reasons:<br /><br /><ul><li>Portability: I&rsquo;d rather avoid platform-specific code like this.&nbsp;For one thing, the <a href="http://www.chromium.org/nativeclient/pnacl/bitcode-abi">PNaCl ABI</a>&nbsp;calls out trampoline intrinsics as being unsupported.</li><li>Testability: I should investigate the problems I observed with lli/JIT further, and I&rsquo;m loath to change implementation to support tests, it is a real problem. I rely heavily on tests to make sure I haven&rsquo;t broken anything.</li></ul><div>Until I find out that using trampolines has a marked benefit to performance in real programs, I intend to replace the current implementation with one that uses a pair of pointers for functions. The bound argument will stored in one pointer, and the function pointer in another. This has implications for all function calls, though it should be simple to achieve good performance in most cases.<br /><br /></div><h4>What&rsquo;s next?</h4><div>Haven&rsquo;t figured this one out yet. I have been meaning to play more with PNaCl, so I might take some time now to do that. I expect I&rsquo;ll be slowing down development considerably early 2013, as (a) we&rsquo;re knocking down our place and rebuilding, and (b) my second child is on the way. I hope to have llgo in a better state for contributions by then, so others can pick up the slack.</div><div><br /></div><div>I expect in the near future I&rsquo;ll start playing with clang/cgo integration, as I start playing with PNaCl. I&rsquo;ll write back when I have something to demonstrate.</div><div><br /></div><div>Until then.</div></p>
-
-      </div>
-      <h2 class="subtitle is-6">
-      Posted November 25, 2012.
-      Tags: <a href="/tags/go">go</a>, <a href="/tags/llgo">llgo</a>, <a href="/tags/llvm">llvm</a>.
       </h2>
     </article>
     
