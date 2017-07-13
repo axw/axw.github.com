@@ -52,6 +52,111 @@
   <div class="container">
     
     <article>
+      <h1 class="title"><a href="https://awilkins.id.au/post/juju-2.3-storage/">Coming in Juju 2.3: storage improvements</a></h1>
+      <div class="content">
+        
+
+<p>I&rsquo;ve just about wrapped up a set of improvements to storage for
+<a href="https://jujucharms.com/">Juju</a> 2.3, the next &ldquo;minor&rdquo; release.
+If you&rsquo;re already using, or have been planning to use Juju&rsquo;s
+storage support, read on.</p>
+
+<h3 id="dynamic-storage-management">Dynamic storage management</h3>
+
+<p>Juju charms can specify storage requirements: the number of
+filesystems or block devices its application requires. For
+example, the <a href="https://jujucharms.com/postgresql">PostgreSQL</a>
+charm requires a filesystem on which to store the database.
+If you don&rsquo;t tell Juju otherwise, the storage will go onto
+the root filesystem, but you can also tell Juju to provide
+the charm with cloud storage (Amazon EBS, OpenStack Cinder,
+etc.)</p>
+
+<p>One of the missing pieces that users have been asking for is
+the ability to manage the lifecycle of storage independently
+of applications and units, and to reuse existing storage. In
+Juju 2.3, when you remove an application or unit, the storage
+attached to the unit(s) will (if possible) be detached, rather
+than destroyed, and will remain in the model. You can then
+either remove the storage using <code>juju remove-storage</code>, or
+attach it to a new unit using the new <code>juju attach-storage</code>
+command, or the <code>--attach-storage</code> flag added to <code>juju deploy</code>
+and <code>juju add-unit</code>. To complement <code>juju attach-storage</code>, there
+is also a new <code>juju detach-storage</code> command.</p>
+
+<p>So to illustrate, you can now deploy PostgreSQL with cloud
+storage, then remove the application, and redeploy (e.g. with
+more RAM), using the same storage.</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">juju deploy postgresql --storage=10G
+…
+juju remove-application postgresql
+…
+juju deploy postgresql --constraints mem=16G --attach-storage pgdata/0
+</pre></div>
+
+
+<p>We&rsquo;re still working on giving you commands to remove storage
+from the model without destroying it, and then import it into
+a new model (possibly new controller). This is required
+for disaster recovery. Whether this makes it for 2.3 depends
+on prioritisation; if it doesn&rsquo;t make it for 2.3, it shouldn&rsquo;t
+be far behind.</p>
+
+<h3 id="lxd-storage-provider">LXD Storage Provider</h3>
+
+<p>One thing that we hadn&rsquo;t planned for 2.3, but we did manage to
+get done, is a LXD storage provider. <a href="https://insights.ubuntu.com/2017/07/12/storage-management-in-lxd-2-15/">LXD has recently added
+its own storage management API</a>,
+and Juju 2.3 will have a storage provider that uses it. I
+originally implemented the Juju side of things as a bit of a
+hack, behind a feature flag, in order to speed up the development
+of the aforementioned attach/detach changes. The LXD storage
+API turned out to be very straight forward to build on, so we
+decided to release the Juju changes into the wild in case it&rsquo;s
+of use to others. Particularly if you&rsquo;re developing or testing
+charms that use storage, this should be useful.</p>
+
+<p>Using the LXD storage provider is as simple as:</p>
+
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%">juju deploy postgresql --storage=10G,lxd
+</pre></div>
+
+
+<p>Each storage pool using the &ldquo;lxd&rdquo; storage provider will create
+an associated storage in LXD. When you create a storage pool
+in Juju, you need to specify two configuration attributes:</p>
+
+<ul>
+<li>the LXD storage pool name, as the &ldquo;lxd-pool&rdquo; attribute</li>
+<li>the LXD storage driver, as the &ldquo;driver&rdquo; attribute</li>
+</ul>
+
+<p>You can also define driver-specific attributes, which will be
+passed through to the LXD storage driver verbatim.</p>
+
+<p>Juju predefines a &ldquo;lxd-zfs&rdquo; pool, with the following attributes:</p>
+
+<ul>
+<li>lxd-pool=juju-zfs</li>
+<li>driver=zfs</li>
+<li>zfs.pool_name=juju-zfs</li>
+</ul>
+
+<p>If you deploy an application with storage using the lxd-zfs
+pool, Juju will create a LXD storage pool called &ldquo;juju-zfs&rdquo;
+with the &ldquo;zfs&rdquo; driver, and ZFS pool called &ldquo;juju-zfs&rdquo;. To
+find out more about the LXD storage driver options, see the
+<a href="https://github.com/lxc/lxd/blob/master/doc/storage.md">LXD storage docs</a>.</p>
+
+      </div>
+      <h2 class="subtitle is-6">
+      Posted July 13, 2017.
+      Tags: <a href="/tags/juju">juju</a>, <a href="/tags/storage">storage</a>, <a href="/tags/lxd">lxd</a>.
+      </h2>
+    </article>
+    
+    <article>
       <h1 class="title"><a href="https://awilkins.id.au/post/juju-2.1-lxd-centos/">Juju 2.1 and CentOS</a></h1>
       <div class="content">
         <p>In the <a href="https://jujucharms.com/">Juju</a> 2.1 release, I made a couple of small

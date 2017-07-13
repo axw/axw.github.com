@@ -6,8 +6,111 @@
     <description>Recent content in Posts on awilkins.id.au</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 23 Feb 2017 11:50:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 13 Jul 2017 15:41:31 +0800</lastBuildDate>
     <atom:link href="https://awilkins.id.au/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Coming in Juju 2.3: storage improvements</title>
+      <link>https://awilkins.id.au/post/juju-2.3-storage/</link>
+      <pubDate>Thu, 13 Jul 2017 15:41:31 +0800</pubDate>
+      
+      <guid>https://awilkins.id.au/post/juju-2.3-storage/</guid>
+      <description>
+
+&lt;p&gt;I&amp;rsquo;ve just about wrapped up a set of improvements to storage for
+&lt;a href=&#34;https://jujucharms.com/&#34;&gt;Juju&lt;/a&gt; 2.3, the next &amp;ldquo;minor&amp;rdquo; release.
+If you&amp;rsquo;re already using, or have been planning to use Juju&amp;rsquo;s
+storage support, read on.&lt;/p&gt;
+
+&lt;h3 id=&#34;dynamic-storage-management&#34;&gt;Dynamic storage management&lt;/h3&gt;
+
+&lt;p&gt;Juju charms can specify storage requirements: the number of
+filesystems or block devices its application requires. For
+example, the &lt;a href=&#34;https://jujucharms.com/postgresql&#34;&gt;PostgreSQL&lt;/a&gt;
+charm requires a filesystem on which to store the database.
+If you don&amp;rsquo;t tell Juju otherwise, the storage will go onto
+the root filesystem, but you can also tell Juju to provide
+the charm with cloud storage (Amazon EBS, OpenStack Cinder,
+etc.)&lt;/p&gt;
+
+&lt;p&gt;One of the missing pieces that users have been asking for is
+the ability to manage the lifecycle of storage independently
+of applications and units, and to reuse existing storage. In
+Juju 2.3, when you remove an application or unit, the storage
+attached to the unit(s) will (if possible) be detached, rather
+than destroyed, and will remain in the model. You can then
+either remove the storage using &lt;code&gt;juju remove-storage&lt;/code&gt;, or
+attach it to a new unit using the new &lt;code&gt;juju attach-storage&lt;/code&gt;
+command, or the &lt;code&gt;--attach-storage&lt;/code&gt; flag added to &lt;code&gt;juju deploy&lt;/code&gt;
+and &lt;code&gt;juju add-unit&lt;/code&gt;. To complement &lt;code&gt;juju attach-storage&lt;/code&gt;, there
+is also a new &lt;code&gt;juju detach-storage&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;p&gt;So to illustrate, you can now deploy PostgreSQL with cloud
+storage, then remove the application, and redeploy (e.g. with
+more RAM), using the same storage.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;juju deploy postgresql --storage=10G
+…
+juju remove-application postgresql
+…
+juju deploy postgresql --constraints mem=16G --attach-storage pgdata/0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We&amp;rsquo;re still working on giving you commands to remove storage
+from the model without destroying it, and then import it into
+a new model (possibly new controller). This is required
+for disaster recovery. Whether this makes it for 2.3 depends
+on prioritisation; if it doesn&amp;rsquo;t make it for 2.3, it shouldn&amp;rsquo;t
+be far behind.&lt;/p&gt;
+
+&lt;h3 id=&#34;lxd-storage-provider&#34;&gt;LXD Storage Provider&lt;/h3&gt;
+
+&lt;p&gt;One thing that we hadn&amp;rsquo;t planned for 2.3, but we did manage to
+get done, is a LXD storage provider. &lt;a href=&#34;https://insights.ubuntu.com/2017/07/12/storage-management-in-lxd-2-15/&#34;&gt;LXD has recently added
+its own storage management API&lt;/a&gt;,
+and Juju 2.3 will have a storage provider that uses it. I
+originally implemented the Juju side of things as a bit of a
+hack, behind a feature flag, in order to speed up the development
+of the aforementioned attach/detach changes. The LXD storage
+API turned out to be very straight forward to build on, so we
+decided to release the Juju changes into the wild in case it&amp;rsquo;s
+of use to others. Particularly if you&amp;rsquo;re developing or testing
+charms that use storage, this should be useful.&lt;/p&gt;
+
+&lt;p&gt;Using the LXD storage provider is as simple as:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;juju deploy postgresql --storage=10G,lxd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Each storage pool using the &amp;ldquo;lxd&amp;rdquo; storage provider will create
+an associated storage in LXD. When you create a storage pool
+in Juju, you need to specify two configuration attributes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;the LXD storage pool name, as the &amp;ldquo;lxd-pool&amp;rdquo; attribute&lt;/li&gt;
+&lt;li&gt;the LXD storage driver, as the &amp;ldquo;driver&amp;rdquo; attribute&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can also define driver-specific attributes, which will be
+passed through to the LXD storage driver verbatim.&lt;/p&gt;
+
+&lt;p&gt;Juju predefines a &amp;ldquo;lxd-zfs&amp;rdquo; pool, with the following attributes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;lxd-pool=juju-zfs&lt;/li&gt;
+&lt;li&gt;driver=zfs&lt;/li&gt;
+&lt;li&gt;zfs.pool_name=juju-zfs&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you deploy an application with storage using the lxd-zfs
+pool, Juju will create a LXD storage pool called &amp;ldquo;juju-zfs&amp;rdquo;
+with the &amp;ldquo;zfs&amp;rdquo; driver, and ZFS pool called &amp;ldquo;juju-zfs&amp;rdquo;. To
+find out more about the LXD storage driver options, see the
+&lt;a href=&#34;https://github.com/lxc/lxd/blob/master/doc/storage.md&#34;&gt;LXD storage docs&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Juju 2.1 and CentOS</title>
@@ -334,16 +437,6 @@ at &lt;a href=&#34;https://axwalk.blogspot.com&#34;&gt;my old Blogger site&lt;/a
       
       <guid>https://awilkins.id.au/post/blogger/unit-testing-llgos-runtime/</guid>
       <description>&lt;p&gt;It&amp;rsquo;s been a while since I last wrote, primarily because I&amp;rsquo;ve been moving house and was without Internet at home during the process. It&amp;rsquo;s back now, but now I have Diablo III to contend with.&lt;br /&gt;&lt;br /&gt;In my &lt;a href=&#34;http://blog.awilkins.id.au/2012/04/llgo-runtime-emerges.html&#34;&gt;previous post&lt;/a&gt; I mentioned that I would create a new branch for working on the &lt;a href=&#34;http://github.com/axw/llgo&#34;&gt;llgo &lt;/a&gt;runtime. I haven&amp;rsquo;t done that yet, though I haven&amp;rsquo;t broken the build either. Rather, I&amp;rsquo;ve introduced conditional compilation to &lt;a href=&#34;http://github.com/axw/gollvm&#34;&gt;gollvm &lt;/a&gt;for builds against LLVM&amp;rsquo;s trunk where unreleased functionality is required, e.g. LinkModules. This isn&amp;rsquo;t currently being used in llgo-proper, so I&amp;rsquo;ve gotten away without branching so far.&lt;br /&gt;&lt;br /&gt;The tag for building gollvm with unreleased functions is &amp;ldquo;llvmsvn&amp;rdquo;, so to build gollvm with LLVM&amp;rsquo;s trunk, including the LinkModules function, do the following:&lt;br /&gt;&lt;pre style=&#34;background-color: #f8f8f8; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(204, 204, 204); color: #333333; font-family: &#39;Bitstream Vera Sans Mono&#39;, Courier, monospace; font-size: 13px; line-height: 19px; margin-bottom: 15px; margin-top: 15px; overflow: auto; padding: 6px 10px;&#34;&gt;&lt;code style=&#34;background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: none; font-family: &#39;Bitstream Vera Sans Mono&#39;, Courier, monospace; font-size: 12px; margin: 0px; padding: 0px;&#34;&gt;curl &lt;a href=&#34;https://raw.github.com/axw/gollvm/master/install.sh&#34;&gt;https://raw.github.com/axw/gollvm/master/install.sh&lt;/a&gt; -tags llvmsvn | sh&lt;/code&gt;&lt;/pre&gt;So I didn&amp;rsquo;t break &amp;ldquo;the build&amp;rdquo;, meaning you can still build gollvm/llgo without also building LLVM from source. I did, however, break the llgo unit tests, as they are using the new LinkModules function. If you want to run the unit tests without building LLVM from source, then you can comment out the call to &lt;i&gt;llvm.LinkModules&lt;/i&gt;&amp;nbsp;in llgo/utils_test.go&lt;i&gt;; &lt;/i&gt;of course, you should&amp;nbsp;expect failures due to the runtime not being linked in, but that doesn&amp;rsquo;t involve all tests.&lt;br /&gt;&lt;br /&gt;What else is new?&lt;br /&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=&#34;https://groups.google.com/d/msg/golang-dev/aYZM61-ySUs/qVjKlt1WtWAJ&#34;&gt;I announced on golang-dev a couple of weeks ago&lt;/a&gt; that I intend to work on getting exp/types up to snuff. I&amp;rsquo;ve moved some of the type construction code out of llgo-proper into llgo/types (a fork of exp/types), and eliminated most of the llgo-specific stuff from llgo/types. I&amp;rsquo;ll need to set aside some time soon to learn how to use Mercurial and create some changelists.&lt;/li&gt;&lt;/ul&gt;&lt;ul&gt;&lt;li&gt;A few weeks ago I started &lt;a href=&#34;https://plus.google.com/u/0/102738380796586573408/posts/GibftVAePRW&#34;&gt;playing with llgo and PNaCl&lt;/a&gt;, to see how hard it would be to get something running in Chrome. It works (with the IR Translator/external sandbox anyway), but then llgo doesn&amp;rsquo;t really do much at the moment.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;That&amp;rsquo;s all for now.&lt;/div&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>An llgo runtime emerges</title>
-      <link>https://awilkins.id.au/post/blogger/an-llgo-runtime-emerges/</link>
-      <pubDate>Sat, 28 Apr 2012 15:44:00 +0000</pubDate>
-      
-      <guid>https://awilkins.id.au/post/blogger/an-llgo-runtime-emerges/</guid>
-      <description>&lt;p&gt;It&amp;rsquo;s been a long time coming, but I&amp;rsquo;m now starting to put together pieces of the llgo runtime. Don&amp;rsquo;t expect much any time soon, but I am zeroing in on a design at least.&amp;nbsp;The sleuths in the crowd will find that only string concatenation has been implemented thus far, which is pretty boring. Next up, I hope, will be interface-to-interface conversions, and interface-to-value conversions, both of which require (for a sane implementation) a runtime library.&lt;br /&gt;&lt;br /&gt;I had previously intended to write the runtime largely in C, as I expected that would be the easiest route. I started down this road writing a basic thread creation routine using pthread, written in C. The code was compiled using &lt;a href=&#34;http://clang.llvm.org/&#34;&gt;Clang&lt;/a&gt;, emitting LLVM IR which could be easily linked with the code generated by llgo. It&amp;rsquo;s more or less the same idea implemented by the gc Go compiler (linking C and Go code, not relying on pthread). Even so, I&amp;rsquo;d like to write the runtime in Go as much as possible.&lt;br /&gt;&lt;br /&gt;Why write the runtime in Go? Well for one, it will make llgo much more self contained, which will make distribution much easier since there won&amp;rsquo;t be a reliance on Clang. Another reason is based on a lofty, but absolutely necessary goal: that llgo will one day be able to compile itself. If llgo compiles itself, and compiles its own runtime, then we have a great target for compiler optimisations: the compiler itself. In other words, &lt;a href=&#34;http://prog21.dadgum.com/136.html&#34;&gt;&amp;ldquo;compiler optimisations should pay for themselves.&amp;rdquo;&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;In my last post I mentioned that LLVM 3.1 is coming up fast, and this release has the changes required by llgo. Unfortunately, I&amp;rsquo;ve just found that the C API lacks an interface for linking modules, so I&amp;rsquo;m going to have to submit a patch to LLVM again, and the window for inclusion in 3.1 has certainly passed. Rather than break gollvm/llgo&amp;rsquo;s trunk again, I&amp;rsquo;ll create a branch for work on the runtime. I&amp;rsquo;ll post again when I&amp;rsquo;ve submitted a patch to LLVM, assuming the minor addition is accepted.&lt;/p&gt;
 </description>
     </item>
     

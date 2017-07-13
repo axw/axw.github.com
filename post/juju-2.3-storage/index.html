@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lxd | awilkins.id.au</title>
+<title>Coming in Juju 2.3: storage improvements | awilkins.id.au</title>
 <link rel="stylesheet" href="https://awilkins.id.au//css/style.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 
@@ -50,11 +49,10 @@
 
 <section class="section">
   <div class="container">
-    
-    <article>
-      <h1 class="title"><a href="https://awilkins.id.au/post/juju-2.3-storage/">Coming in Juju 2.3: storage improvements</a></h1>
-      <div class="content">
-        
+    <h2 class="subtitle is-6">July 13, 2017</h2>
+    <h1 class="title">Coming in Juju 2.3: storage improvements</h1>
+    <div class="content">
+      
 
 <p>I&rsquo;ve just about wrapped up a set of improvements to storage for
 <a href="https://jujucharms.com/">Juju</a> 2.3, the next &ldquo;minor&rdquo; release.
@@ -149,84 +147,10 @@ with the &ldquo;zfs&rdquo; driver, and ZFS pool called &ldquo;juju-zfs&rdquo;. T
 find out more about the LXD storage driver options, see the
 <a href="https://github.com/lxc/lxd/blob/master/doc/storage.md">LXD storage docs</a>.</p>
 
-      </div>
-      <h2 class="subtitle is-6">
-      Posted July 13, 2017.
-      Tags: <a href="/tags/juju">juju</a>, <a href="/tags/storage">storage</a>, <a href="/tags/lxd">lxd</a>.
-      </h2>
-    </article>
-    
-    <article>
-      <h1 class="title"><a href="https://awilkins.id.au/post/juju-2.1-lxd-centos/">Juju 2.1 and CentOS</a></h1>
-      <div class="content">
-        <p>In the <a href="https://jujucharms.com/">Juju</a> 2.1 release, I made a couple of small
-changes to better support CentOS servers.</p>
-
-<p>The first change was to support &ldquo;manual provisioning&rdquo; of CentOS machines.
-Manual provisioning is when you point Juju at a machine, and Juju connects
-to the machine over SSH and sets it up with a Juju agent. To do this, Juju
-needs to run a small shell script to discover the OS version and hardware
-characteristics of the machine. With a minor change to that script, you can
-now manually provision CentOS machines.</p>
-
-<p>The second change is to support CentOS LXD images. A small change was needed
-in the Juju code to support the &ldquo;centos7&rdquo; OS version, and alter the way we
-handle local LXD image aliases. If an image exists locally with the expected
-alias (e.g. &ldquo;juju/centos7/amd64&rdquo;), then we&rsquo;ll use that and skip looking in
-the remote image sources. This also improves container startup time when
-you live in a faraway land like me. Altering Juju is not quite enough though,
-as there are no existing CentOS images that Juju can use.</p>
-
-<p>Juju (mostly) requires <a href="https://cloudinit.readthedocs.io/">cloud-init</a> to be
-present on the machines it starts, so that it can inject Juju-specific configuration
-and scripts to run on startup. Unforunately, there are no CentOS LXD images
-that have cloud-init already. To work around this, I wrote a standalone Go
-program to transform the <a href="https://linuxcontainers.org">linuxcontainers.org</a>
-CentOS image: <a href="https://github.com/axw/juju-lxd-centos-image-builder">github.com/axw/juju-lxd-centos-image-builder</a>.
-Eventually we hope to have pre-canned CentOS LXD images available to Juju,
-but for now you can use this program to prepare an image for Juju. Run it from
-the LXD host, and Juju will be able to use the resulting image.</p>
-
-      </div>
-      <h2 class="subtitle is-6">
-      Posted February 23, 2017.
-      Tags: <a href="/tags/juju">juju</a>, <a href="/tags/lxd">lxd</a>.
-      </h2>
-    </article>
-    
+    </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="container">
-    <nav class="level is-mobile">
-      <div class="level-left">
-        <div class="level-item">
-          
-          <a class="button is-disabled">
-            <span class="icon is-small is-marginless">
-              <i class="fa fa-angle-left"></i>
-            </span>
-            Newer
-          </a>
-          
-        </div>
-      </div>
-      <div class="level-right is-marginless">
-        <div class="level-item">
-          
-          <a class="button is-disabled">
-            Older
-            <span class="icon is-small is-marginless">
-              <i class="fa fa-angle-right"></i>
-            </span>
-          </a>
-          
-        </div>
-      </div>
-    </nav>
-  </div>
-</section>
 
 <section class="section">
   <div class="container has-text-centered">
